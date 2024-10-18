@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShoppingController;
+use App\Http\Controllers\QuizController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -48,4 +49,12 @@ Route::prefix('shopping')->group(function () {
    Route::get('about', [ShoppingController::class, 'about'])->name('shopping.about'); 
 });
 
+Route::middleware(['auth'])->group(function () {
+    // use App\Http\Controllers\QuizController;
+    Route::prefix('quiz')->group(function () {
+        Route::get('/{quiz_id}', [QuizController::class, 'show'])->name('quiz.show');
+        Route::post('/{quiz_id}', [QuizController::class, 'submitQuiz'])->name('quiz.submit');     
+    });
+   
+});
 require __DIR__.'/auth.php';

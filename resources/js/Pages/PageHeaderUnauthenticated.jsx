@@ -4,7 +4,7 @@ import NavLink from '@/Components/NavLink';
 export default function PageHeaderUnauthenticated({auth, laravelVersion, phpVersion}){
     return (
         <>
-            <header class="shadow mb-2">
+            {/* <header class="shadow mb-2">
   <div class="relative flex max-w-screen-xl flex-col overflow-hidden px-4 py-4 md:mx-auto md:flex-row md:items-center">
     <a href="#" class="flex items-center whitespace-nowrap text-2xl font-black">
       <span class="mr-2 text-4xl text-blue-600">
@@ -53,13 +53,13 @@ export default function PageHeaderUnauthenticated({auth, laravelVersion, phpVers
          TECH BLOG
         </NavLink>
         </li>        
-        {/* <li class="text-gray-600 md:mr-12 hover:text-blue-600">
+         <li class="text-gray-600 md:mr-12 hover:text-blue-600">
           <button class="rounded-md border-2 border-blue-600 px-6 py-1 font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white">Login</button>
-        </li> */}
+        </li> 
       </ul>
     </nav>
   </div>
-</header>
+</header> */}
 
         </>
     );

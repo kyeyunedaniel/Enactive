@@ -3,7 +3,7 @@ import NavLink from '@/Components/NavLink';
 
 function MainHeader({auth}) {
   return (
-        <div className="sm:fixed sm:top-0 sm:right-0 p-6 text-end">
+        <div className="sm:fixed sm:top-0 sm:right-0 p-6 text-end  dark:bg-gray-900">
                     {auth?.user ? (
                         <Link
                             href={route('dashboard')}

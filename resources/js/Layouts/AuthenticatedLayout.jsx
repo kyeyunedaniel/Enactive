@@ -42,6 +42,11 @@ export default function Authenticated({ user, header, children }) {
                                     User
                                 </NavLink>
                             </div>
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink href={route('quiz.show',{ quiz_id:1 })} active={route().current('quiz.show')}>
+                                    Courses
+                                </NavLink>
+                            </div>
                         </div>
                         {/* <PageHeaderUnauthenticated/> */}
 

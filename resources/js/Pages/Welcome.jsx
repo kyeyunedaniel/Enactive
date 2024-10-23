@@ -6,7 +6,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     return (
         <>
             <Head title="Welcome" />
-            <div className="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
+            <div className="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-100 selection:bg-red-500 selection:text-white">
                 <MainHeader auth={auth}/>
                 {/* <div className="sm:fixed sm:top-0 sm:right-0 p-6 text-end">
                     {auth.user ? (
@@ -57,32 +57,106 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                     <div className="mt-16">
                     {/* <PageHeaderUnauthenticated/> */}
 
-                    <div class="relative mx-auto px-4 pt-16 sm:max-w-xl md:max-w-full md:px-8 lg:py-32 xl:px-20">
-  <div class="mx-auto max-w-xl lg:max-w-screen-xl">
-    <div class="mb-16 lg:mb-0 lg:max-w-lg">
-      <div class="mb-6 max-w-xl">
-        <div>
-          <p class="bg-teal-accent-400 mb-4 inline-block rounded-full px-3 py-px text-xs font-semibold uppercase tracking-wider text-cyan-900">INTRODUCING</p>
-        </div>
-        <h2 class="mb-6 max-w-lg font-sans text-3xl font-bold tracking-tight text-slate-700 sm:text-5xl sm:leading-snug">
-          An inspiring new future <br />
-          for 
-          <span class="inline-block text-red-600"> Enactive<i>Study Link</i></span>
-        </h2>
-        <p class="text-base text-gray-700 md:text-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos, consequuntur quaerat! Optio.</p>
-      </div>
-      <div class="flex items-center">
-        <a href="/" class="mr-6 inline-flex h-12 items-center justify-center rounded bg-cyan-500 px-6 font-medium tracking-wide text-white shadow-md outline-none transition duration-200 hover:bg-cyan-400 focus:ring"> Get started </a>
-        <a href="/" aria-label="" class="inline-flex items-center font-semibold text-cyan-600 transition-colors duration-200 hover:text-cyan-400">Learn more</a>
-      </div>
-    </div>
-  </div>
-  <div class="flex h-full justify-center overflow-hidden lg:absolute lg:bottom-0 lg:right-0 lg:w-2/3 lg:items-end lg:justify-start xl:w-1/2">
-    <img src="/images/SoOmmtD2P6rjV76JvJTc6.png" class="-mb-16 h-64 w-full max-w-xl rounded-2xl object-cover object-top shadow-2xl shadow-cyan-200 lg:ml-64 lg:-mb-24 lg:h-auto lg:max-w-screen-md xl:ml-8 xl:-mb-28" alt="" />
-  </div>
-</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    {/* <div class="relative mx-auto px-4 pt-16 sm:max-w-xl md:max-w-full md:px-8 lg:py-32 xl:px-20">
+                        <div class="mx-auto max-w-xl lg:max-w-screen-xl">
+                            <div class="mb-16 lg:mb-0 lg:max-w-lg">
+                            <div class="mb-6 max-w-xl">
+                                <div>
+                                <p class="bg-teal-accent-400 mb-4 inline-block rounded-full px-3 py-px text-xs font-semibold uppercase tracking-wider text-cyan-900">INTRODUCING</p>
+                                </div>
+                                <h2 class="mb-6 max-w-lg font-sans text-3xl font-bold tracking-tight text-slate-700 sm:text-5xl sm:leading-snug">
+                                An inspiring new future <br />
+                                for 
+                                <span class="inline-block text-red-600"> Enactive<i>Study Link</i></span>
+                                </h2>
+                                <p class="text-base text-gray-700 md:text-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eos, consequuntur quaerat! Optio.</p>
+                            </div>
+                            <div class="flex items-center">
+                                <a href="/" class="mr-6 inline-flex h-12 items-center justify-center rounded bg-cyan-500 px-6 font-medium tracking-wide text-white shadow-md outline-none transition duration-200 hover:bg-cyan-400 focus:ring"> Get started </a>
+                                <a href="/" aria-label="" class="inline-flex items-center font-semibold text-cyan-600 transition-colors duration-200 hover:text-cyan-400">Learn more</a>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="flex h-full justify-center overflow-hidden lg:absolute lg:bottom-0 lg:right-0 lg:w-2/3 lg:items-end lg:justify-start xl:w-1/2">
+                            <img src="/images/SoOmmtD2P6rjV76JvJTc6.png" class="-mb-16 h-64 w-full max-w-xl rounded-2xl object-cover object-top shadow-2xl shadow-cyan-200 lg:ml-64 lg:-mb-24 lg:h-auto lg:max-w-screen-md xl:ml-8 xl:-mb-28" alt="" />
+                        </div>
+                    </div> */}
 
                     </div>
+
+                    <div class="container mx-auto py-12 px-6">
+  
+  {/* <!-- Hero Section --> */}
+  <section class="text-center py-16 bg-gray-200 rounded-lg">
+    <h2 class="text-4xl font-bold mb-6">Continuing Education for Healthcare Providers</h2>
+    <p class="text-lg text-gray-700 mb-6">Expand your knowledge with evidence-based training and certification.</p>
+    <div class="space-x-4">
+      <a href="#" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">Sign In</a>
+      <a href="#" class="bg-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-400">Create an Account</a>
+    </div>
+  </section>
+
+  {/* <!-- Featured Categories/Courses Section --> */}
+  <section class="py-12">
+    <h3 class="text-3xl font-bold text-center mb-8">Explore Our Courses</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      
+      {/* <!-- Category Card 1 --> */}
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        {/* <img src="https://via.placeholder.com/300x200" alt="Cardiology Care" class="rounded-lg mb-4"> */}
+        <h4 class="text-xl font-semibold mb-2">Cardiology Care</h4>
+        <p class="text-gray-600 mb-4">Improve your expertise in heart care with up-to-date resources and certifications.</p>
+        <a href="#" class="text-blue-500 hover:underline">Learn More</a>
+      </div>
+      
+      {/* <!-- Category Card 2 --> */}
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        {/* <img src="https://via.placeholder.com/300x200" alt="Stroke Care" class="rounded-lg mb-4"> */}
+        <h4 class="text-xl font-semibold mb-2">Stroke Care</h4>
+        <p class="text-gray-600 mb-4">Master the latest stroke management techniques for faster recovery.</p>
+        <a href="#" class="text-blue-500 hover:underline">Learn More</a>
+      </div>
+      
+      {/* <!-- Category Card 3 --> */}
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        {/* <img src="https://via.placeholder.com/300x200" alt="Emergency Medicine" class="rounded-lg mb-4"> */}
+        <h4 class="text-xl font-semibold mb-2">Emergency Medicine</h4>
+        <p class="text-gray-600 mb-4">Stay ahead in emergency medicine with cutting-edge training.</p>
+        <a href="#" class="text-blue-500 hover:underline">Learn More</a>
+      </div>
+      
+    </div>
+  </section>
+
+  {/* <!-- Additional Information Section --> */}
+  <section class="py-12 bg-blue-50 rounded-lg">
+    <div class="text-center">
+      <h3 class="text-3xl font-bold mb-4">Stay Current With the Latest in Healthcare Education</h3>
+      <p class="text-gray-700 mb-6">Access comprehensive learning tools, videos, and articles curated for healthcare professionals.</p>
+      <a href="#" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">Explore Resources</a>
+    </div>
+  </section>
+
+</div>
+
+
+
+
+
 
                     <div className="flex justify-center mt-16 px-6 sm:items-center sm:justify-between">
                         <div className="text-center text-sm sm:text-start">&nbsp;</div>

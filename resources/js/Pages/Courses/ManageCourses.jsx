@@ -40,9 +40,18 @@ const ManageCourses = ({ courses, auth, flash }) => {
     };
 
     // Function to handle editing a course
+    // const handleEdit = (course) => {
+    //     setData('title', course.title); // Set title for editing
+    //     setData('description', course.description); // Set description for editing
+    //     setEditingCourseId(course.id);
+    // };
+
     const handleEdit = (course) => {
-        setData('title', course.title); // Set title for editing
-        setData('description', course.description); // Set description for editing
+        setData((prevData) => ({
+            ...prevData,
+            title: course.title,
+            description: course.description,
+        }));
         setEditingCourseId(course.id);
     };
 

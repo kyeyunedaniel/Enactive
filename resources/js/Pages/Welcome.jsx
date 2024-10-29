@@ -1,14 +1,18 @@
 import React from 'react';
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { useEffect } from 'react';
+import { Head } from '@inertiajs/react';
 
-const Welcome = ({ laravelVersion, phpVersion,auth }) => {
+const Welcome = ({ laravelVersion, phpVersion,auth,header }) => {
     useEffect(()=>{
         console.log(JSON.stringify(auth)); 
     },[])
   return (
+    <>
+    <Head title={header} />
     <AuthenticatedLayout user={auth}>
       {/* Login and Register Section */}
+      <div className="px-4 sm:px-8 lg:px-16 xl:px-24 mx-auto max-w-7xl">
       <section className="login-register-section text-center py-16 bg-gray-200 rounded-lg">
         <h2 className="text-4xl font-bold mb-6">Continuing Education for Healthcare Providers</h2>
         <p className="text-lg text-gray-700 mb-6">
@@ -77,7 +81,9 @@ const Welcome = ({ laravelVersion, phpVersion,auth }) => {
           Laravel v{laravelVersion} (PHP v{phpVersion})
         </div>
       </div>
+      </div>
     </AuthenticatedLayout>
+    </>
   );
 };
 

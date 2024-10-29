@@ -3,54 +3,35 @@ import { Link, Head } from "@inertiajs/react";
 import PageHeaderUnauthenticated from "../PageHeaderUnauthenticated";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-const HardcodedCatalogComponent = ({ auth }) => {
+const HardcodedCatalogComponent = ({ auth, courses }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-
-  const catalogItems = [
-    {
-      id: 1,
-      name: "Basic Life Support (BLS) Course",
-      description: "Learn the essential steps for basic life support.",
-      category: "Medical",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 2,
-      name: "Advanced Cardiovascular Life Support (ACLS) Course",
-      description: "In-depth training for advanced cardiovascular support.",
-      category: "Medical",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 3,
-      name: "First Aid Essentials",
-      description: "Learn how to handle common first aid scenarios.",
-      category: "Safety",
-      image: "https://via.placeholder.com/150",
-    },
-    {
-      id: 4,
-      name: "Pediatric Life Support",
-      description: "Specialized support techniques for pediatric care.",
-      category: "Medical",
-      image: "https://via.placeholder.com/150",
-    },
-  ];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
+    setCurrentPage(1); // Reset to first page on search
   };
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
+    setCurrentPage(1); // Reset to first page on category change
   };
 
-  const filteredItems = catalogItems.filter(
+  // Filter the courses based on search and selected category
+  const filteredItems = courses.filter(
     (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) &&
+      item.title.toLowerCase().includes(search.toLowerCase()) &&
       (selectedCategory === "All" || item.category === selectedCategory)
   );
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  // Get the items for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = filteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
     console.log("hardcodedCatalog Component " + JSON.stringify(auth));
@@ -58,8 +39,6 @@ const HardcodedCatalogComponent = ({ auth }) => {
 
   const CatalogContent = (
     <div className="catalog-container mx-auto p-4 max-w-6xl">
-      {/* <h1 className="text-2xl font-bold mb-4">Catalog</h1> */}
-
       <div className="flex">
         {/* Sidebar Filter */}
         <div className="filter-sidebar w-1/4 pr-4">
@@ -85,6 +64,7 @@ const HardcodedCatalogComponent = ({ auth }) => {
               className="border px-3 py-2 rounded w-full mt-1"
             >
               <option value="All">All</option>
+              {/* Dynamically generate categories from courses if necessary */}
               <option value="Medical">Medical</option>
               <option value="Safety">Safety</option>
             </select>
@@ -93,38 +73,47 @@ const HardcodedCatalogComponent = ({ auth }) => {
 
         {/* Catalog Items Section */}
         <div className="catalog-grid w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="item-card border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow"
-              >
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="object-cover w-full h-32 mb-4 rounded-md"
-                />
-                <h2 className="text-lg font-semibold">{item.name}</h2>
-                <p className="text-gray-600">{item.description}</p>
-                <button
-                  onClick={() => alert(`Viewing details for ${item.name}`)}
-                  className="mt-4 text-blue-500 underline"
+                    {currentItems.length > 0 ? (
+              currentItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="item-card border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow flex flex-col justify-between"
                 >
-                  View Details
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="col-span-full text-center">No items match your filters.</p>
-          )}
+                  <div>
+                    <img
+                      src={item.image_url || "https://via.placeholder.com/150"} // Fallback image if image_url is null
+                      alt={item.title}
+                      className="object-cover w-full h-32 mb-4 rounded-md"
+                    />
+                    <h2 className="text-lg font-semibold">{item.title}</h2>
+                    <p className="text-gray-600">{item.description}</p>
+                    <p className="text-gray-800 font-bold">Price: {item.course_price} UGX</p>
+                  </div>
+                  <button
+                    onClick={() => alert(`Viewing details for ${item.title}`)}
+                    className="mt-4 text-blue-500 underline self-end" // Added self-end to align the button to the right
+                  >
+                    View Details
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-full text-center">No items match your filters.</p>
+            )}
         </div>
       </div>
 
-      {/* Pagination - Static for Demo */}
+      {/* Pagination */}
       <div className="pagination mt-8 flex justify-center">
-        <button className="px-3 py-1 mx-1 bg-gray-200 rounded">1</button>
-        <button className="px-3 py-1 mx-1 bg-blue-500 text-white rounded">2</button>
-        <button className="px-3 py-1 mx-1 bg-gray-200 rounded">3</button>
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`px-3 py-1 mx-1 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -135,7 +124,7 @@ const HardcodedCatalogComponent = ({ auth }) => {
       {/* Always show Authenticated Header */}
       <AuthenticatedLayout
         user={auth}
-        header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">All Content</h2>}
+        // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">All Content</h2>}
       >
         {auth?.user ? CatalogContent : <PageHeaderUnauthenticated />}
         {CatalogContent}
@@ -145,12 +134,3 @@ const HardcodedCatalogComponent = ({ auth }) => {
 };
 
 export default HardcodedCatalogComponent;
-
-
-{/* <AuthenticatedLayout
-        user={auth}
-        // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">All Content</h2>}
-      >
-        {auth?.user ? CatalogContent : <PageHeaderUnauthenticated />}
-        {CatalogContent}
-      </AuthenticatedLayout> */}

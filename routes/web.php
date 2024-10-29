@@ -9,6 +9,7 @@ use App\Http\Controllers\ShoppingController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AllContentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,9 +75,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::prefix('content-view')->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('ContentViews/HardcodedCatalogComponent',['auth' => Auth::user()]);
-    })->name('content-view.home');
+    // Route::get('/', function () {
+    //     return Inertia::render('ContentViews/HardcodedCatalogComponent',['auth' => Auth::user()]);
+    // })->name('content-view.home');
+    Route::get('/',[AllContentController::class, 'AllContent'])->name('content-view.home');
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index.2');
 
 });

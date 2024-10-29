@@ -58,7 +58,7 @@ const HardcodedCatalogComponent = ({ auth }) => {
 
   const CatalogContent = (
     <div className="catalog-container mx-auto p-4 max-w-6xl">
-      <h1 className="text-2xl font-bold mb-4">Catalog</h1>
+      {/* <h1 className="text-2xl font-bold mb-4">Catalog</h1> */}
 
       <div className="flex">
         {/* Sidebar Filter */}
@@ -145,3 +145,12 @@ const HardcodedCatalogComponent = ({ auth }) => {
 };
 
 export default HardcodedCatalogComponent;
+
+
+{/* <AuthenticatedLayout
+        user={auth}
+        // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">All Content</h2>}
+      >
+        {auth?.user ? CatalogContent : <PageHeaderUnauthenticated />}
+        {CatalogContent}
+      </AuthenticatedLayout> */}

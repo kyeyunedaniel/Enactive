@@ -13,7 +13,6 @@ export default function Authenticated({ user, header, children }) {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            {/* <MainHeader auth={user} /> */}
             <br />
             <br />
 
@@ -44,11 +43,15 @@ export default function Authenticated({ user, header, children }) {
                                         </NavLink>
                                     </>
                                 ) : (
-                                    // <NavLink href={route('login')} active={route().current('login')}>
-                                    //     Log In
-                                    // </NavLink>
-                                    <MainHeader auth={user} /> 
-// 
+                                    <>
+                                        
+                                        <NavLink href={route('login')} active={route().current('login')}>
+                                            Log In
+                                        </NavLink>
+                                        <NavLink href={route('register')} active={route().current('register')}>
+                                            Register
+                                        </NavLink>
+                                    </>
                                 )}
                             </div>
                         </div>

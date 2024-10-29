@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Link, Head } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
@@ -7,11 +7,14 @@ const ManageCourses = ({ courses, auth, flash }) => {
     const { data, setData, post, delete: destroy, processing, errors } = useForm({
         title: '',
         description: '',
+        course_price: '',
+        image_url: null,
+        video_url: null,
     });
 
-    const [editingCourseId, setEditingCourseId] = React.useState(null);
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
-    const [courseToDelete, setCourseToDelete] = React.useState(null);
+    const [editingCourseId, setEditingCourseId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [courseToDelete, setCourseToDelete] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
@@ -19,45 +22,54 @@ const ManageCourses = ({ courses, auth, flash }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('description', data.description);
+        formData.append('course_price', data.course_price);
+        if (data.image_url) formData.append('image_url', data.image_url);
+        if (data.video_url) formData.append('video_url', data.video_url);
+
         // Check if we are editing or adding a course
+        console.log(JSON.stringify(editingCourseId)); 
         if (editingCourseId) {
             post(route('courses.update', editingCourseId), {
+                data: formData,
                 onSuccess: () => {
                     resetFields();
                     setSuccessMessage('Course updated successfully!');
                     setIsSuccessModalOpen(true);
                 },
+                forceFormData: true,
             });
         } else {
             post(route('courses.store'), {
+                data: formData,
                 onSuccess: () => {
                     resetFields();
                     setSuccessMessage('Course added successfully!');
                     setIsSuccessModalOpen(true);
                 },
+                forceFormData: true,
             });
         }
     };
 
     // Function to handle editing a course
-    // const handleEdit = (course) => {
-    //     setData('title', course.title); // Set title for editing
-    //     setData('description', course.description); // Set description for editing
-    //     setEditingCourseId(course.id);
-    // };
-
     const handleEdit = (course) => {
         setData((prevData) => ({
             ...prevData,
             title: course.title,
             description: course.description,
+            course_price: course.course_price,
+            image_url: course.image_url, // Reset image for editing
+            video_url: course.video_url, // Reset video for editing
         }));
         setEditingCourseId(course.id);
     };
 
     // Reset form fields
     const resetFields = () => {
-        setData({ title: '', description: '' });
+        setData({ title: '', description: '', course_price: '', image_url: null, video_url: null });
         setEditingCourseId(null);
     };
 
@@ -112,6 +124,37 @@ const ManageCourses = ({ courses, auth, flash }) => {
                             ></textarea>
                             {errors.description && <div className="text-red-600">{errors.description}</div>}
                         </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Course Price 'UGX'</label>
+                            <input
+                                type="number"
+                                value={data.course_price}
+                                onChange={(e) => setData('course_price', e.target.value)}
+                                className="border rounded px-3 py-2 w-full"
+                                required
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Image</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setData('image_url', e.target.files[0])}
+                                className="border rounded px-3 py-2 w-full"
+                            />
+                            {errors.image_url && <div className="text-red-600">{errors.image_url}</div>}
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700">Video URL</label>
+                            <input
+                                type="file"
+                                accept="video/*"
+                                onChange={(e) => setData('video_url', e.target.files[0])}
+                                className="border rounded px-3 py-2 w-full"
+                            />
+                            {errors.video_url && <div className="text-red-600">{errors.video_url}</div>}
+                        </div>
+                        {/* <div>{setData('image_url', e.target.files[0])}</div> */}
                         <button
                             type="submit"
                             className={`bg-blue-600 text-white px-4 py-2 rounded ${processing ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -128,6 +171,7 @@ const ManageCourses = ({ courses, auth, flash }) => {
                                 <th className="border px-4 py-2">ID</th>
                                 <th className="border px-4 py-2">Title</th>
                                 <th className="border px-4 py-2">Description</th>
+                                <th className="border px-4 py-2">Course Price</th>
                                 <th className="border px-4 py-2">Actions</th>
                             </tr>
                         </thead>
@@ -137,16 +181,17 @@ const ManageCourses = ({ courses, auth, flash }) => {
                                     <td className="border px-4 py-2">{course.id}</td>
                                     <td className="border px-4 py-2">{course.title}</td>
                                     <td className="border px-4 py-2">{course.description}</td>
+                                    <td className="border px-4 py-2">{course.course_price}</td>
                                     <td className="border px-4 py-2">
                                         <button
                                             onClick={() => handleEdit(course)}
-                                            className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                                            className="bg-yellow-400 text-white px-2 py-1 rounded mr-2"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => handleOpenModal(course.id)}
-                                            className="bg-red-600 text-white px-2 py-1 rounded"
+                                            className="bg-red-400 text-white px-2 py-1 rounded"
                                         >
                                             Delete
                                         </button>
@@ -179,22 +224,24 @@ const ManageCourses = ({ courses, auth, flash }) => {
                             </div>
                         </div>
                     )}
-                   {isSuccessModalOpen && (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Success</h2>
-            <p>{successMessage}</p>
-            <div className="flex justify-end mt-6">
-                <button
-                    onClick={() => setIsSuccessModalOpen(false)}
-                    className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-                >
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-)}
+
+                    {/* Success Modal */}
+                    {isSuccessModalOpen && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                                <h2 className="text-lg font-semibold mb-4">Success</h2>
+                                <p>{successMessage}</p>
+                                <div className="flex justify-end mt-6">
+                                    <button
+                                        onClick={() => setIsSuccessModalOpen(false)}
+                                        className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </AuthenticatedLayout>
         </>

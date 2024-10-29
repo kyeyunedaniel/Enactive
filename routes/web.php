@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ShoppingController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\CourseController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +69,14 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
     });
    
+});
+
+Route::prefix('content-view')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('ContentViews/HardcodedCatalogComponent',['auth' => Auth::user()]);
+    })->name('content-view.home');
+    Route::get('courses', [CourseController::class, 'index'])->name('courses.index.2');
+
 });
 require __DIR__.'/auth.php';
 

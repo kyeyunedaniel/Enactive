@@ -2,7 +2,11 @@ import { Link, Head } from '@inertiajs/react';
 import NavLink from '@/Components/NavLink';
 import GlobalHeading from './GlobalHeading';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import { useEffect } from 'react';
 function MainHeader({auth}) {
+    useEffect(()=>{
+        console.log("mainHeader "+JSON.stringify(auth))
+    },[])
   return (
         <>
         {/* <div class="flex-1"> */}

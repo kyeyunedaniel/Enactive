@@ -53,7 +53,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                     {/* <PageHeaderUnauthenticated/> */}
                     </div>
                     <br />
-                    <PageHeaderUnauthenticated/>
+                    {/* <PageHeaderUnauthenticated/> */}
                     <div className="mt-16">
                     {/* <PageHeaderUnauthenticated/> */}
 

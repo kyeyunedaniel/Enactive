@@ -156,10 +156,27 @@ public function update(Request $request, $course_id)
 }
 
 
-    public function destroy(Course $course)
-    {
-        $course->delete();
-
-        return redirect()->route('courses.index')->with('success', 'Course deleted successfully!');
+public function destroy(Course $course)
+{
+    // Delete the associated image if it exists
+    if ($course->image_url) {
+        $imagePath = str_replace(url('storage/'), 'storage/', $course->image_url); // Adjust the URL to file path
+        if (file_exists(public_path($imagePath))) {
+            unlink(public_path($imagePath)); // Delete the old image file
+        }
     }
+
+    // Delete the associated video if it exists
+    if ($course->video_url) {
+        $videoPath = str_replace(url('storage/'), 'storage/', $course->video_url); // Adjust the URL to file path
+        if (file_exists(public_path($videoPath))) {
+            unlink(public_path($videoPath)); // Delete the old video file
+        }
+    }
+
+    // Delete the course record from the database
+    $course->delete();
+
+    return redirect()->route('courses.index')->with('success', 'Course deleted successfully!');
+}
 }

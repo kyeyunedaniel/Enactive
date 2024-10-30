@@ -19,5 +19,12 @@ class AllContentController extends Controller
             'courses'=>$courses
         ]);  
     }
-
+    public function ViewCourse(){
+        $auth=Auth::user();
+        
+        // return Inertia::render('Courses/ViewCourse',['auth'=>$auth]);
+         return Inertia::render('Courses/ViewCourse')->with([
+            'auth'=>$auth
+        ]);
+    }
 }

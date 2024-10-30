@@ -89,12 +89,14 @@ const HardcodedCatalogComponent = ({ auth, courses }) => {
                     <p className="text-gray-600">{item.description}</p>
                     <p className="text-gray-800 font-bold">Price: {item.course_price} UGX</p>
                   </div>
-                  <button
-                    onClick={() => alert(`Viewing details for ${item.title}`)}
-                    className="mt-4 text-blue-500 underline self-end" // Added self-end to align the button to the right
+
+                  <Link
+                    href={route('content-view.course', { item: item })} // Pass item as a parameter
+                    className="mt-4 text-blue-500 underline self-end" // Style directly on Link
                   >
                     View Details
-                  </button>
+                  </Link>
+
                 </div>
               ))
             ) : (
@@ -126,7 +128,7 @@ const HardcodedCatalogComponent = ({ auth, courses }) => {
         user={auth}
         // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">All Content</h2>}
       >
-        {auth?.user ? CatalogContent : <PageHeaderUnauthenticated />}
+        {/* {auth?.user ? CatalogContent : <PageHeaderUnauthenticated />} */}
         {CatalogContent}
       </AuthenticatedLayout>
     </>
@@ -134,3 +136,4 @@ const HardcodedCatalogComponent = ({ auth, courses }) => {
 };
 
 export default HardcodedCatalogComponent;
+// content-view.course

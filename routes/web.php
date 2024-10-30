@@ -79,6 +79,7 @@ Route::prefix('content-view')->group(function () {
     //     return Inertia::render('ContentViews/HardcodedCatalogComponent',['auth' => Auth::user()]);
     // })->name('content-view.home');
     Route::get('/',[AllContentController::class, 'AllContent'])->name('content-view.home');
+    Route::get('/view-course/{item}',[AllContentController::class, 'ViewCourse'])->name('content-view.course');
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index.2');
 
 });

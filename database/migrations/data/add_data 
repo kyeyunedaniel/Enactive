@@ -1,0 +1,34 @@
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(1, 'Introduction to Programming', 'Learn the basics of programming.', 1, '2024-10-19 00:04:20', '2024-10-29 20:09:55', NULL, NULL, 50000, 1);
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(2, 'Introduction to CSS', 'Learn the basics of CSS.', 1, '2024-10-22 20:38:09', '2024-10-29 20:10:02', NULL, NULL, 1000, 1);
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(16, 'Introduction to JAVA', 'Learn the basics of Java.', 1, '2024-10-22 20:57:13', '2024-10-29 20:10:09', NULL, NULL, 2000, 1);
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(17, 'Introduction to HTML', 'Learn the basics of HTML.', 1, '2024-10-22 21:05:18', '2024-10-29 20:10:16', NULL, NULL, 1000, 1);
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(18, 'Introduction to JAVASCRIPT', 'Learn the basics of JAVASCRIPT', 1, '2024-10-22 21:18:43', '2024-10-29 20:10:23', NULL, NULL, 2000, 1);
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(19, 'Introduction to GIT', 'Learn the basics of GIT.', 1, '2024-10-29 18:47:52', '2024-10-29 20:10:52', NULL, NULL, 10000, 1);
+INSERT INTO Enactive.courses (id, title, description, created_by, created_at, updated_at, image_url, video_url, course_price, category_id) VALUES(20, 'Introduction to SQL', 'Learn the basics of SQL.', 1, '2024-10-29 18:48:21', '2024-10-29 20:11:22', NULL, NULL, 10000, 1);
+
+
+QUIZ
+INSERT INTO Enactive.quizzes (id, course_id, title, description, is_active, created_at, updated_at) VALUES(1, 1, 'Programming Basics Quiz', 'Test your knowledge on programming basics.', 1, '2024-10-19 00:04:54', '2024-10-19 00:04:54');
+
+Questions 
+
+INSERT INTO Enactive.questions (id, quiz_id, question_text, question_type, created_at, updated_at) VALUES(1, 1, 'What is a variable?', 'multiple_choice', '2024-10-19 00:05:31', '2024-10-19 00:05:31');
+INSERT INTO Enactive.questions (id, quiz_id, question_text, question_type, created_at, updated_at) VALUES(2, 1, 'What is a function?', 'multiple_choice', '2024-10-19 00:05:31', '2024-10-19 00:05:31');
+
+
+answers 
+
+INSERT INTO Enactive.answers (id, question_id, answer_text, is_correct, created_at, updated_at) VALUES(1, 1, 'A container for storing data.', 1, '2024-10-19 00:05:50', '2024-10-19 00:05:50');
+INSERT INTO Enactive.answers (id, question_id, answer_text, is_correct, created_at, updated_at) VALUES(2, 1, 'A type of loop.', 0, '2024-10-19 00:05:50', '2024-10-19 00:05:50');
+INSERT INTO Enactive.answers (id, question_id, answer_text, is_correct, created_at, updated_at) VALUES(3, 1, 'An output command.', 0, '2024-10-19 00:05:50', '2024-10-19 00:05:50');
+INSERT INTO Enactive.answers (id, question_id, answer_text, is_correct, created_at, updated_at) VALUES(4, 2, 'A reusable block of code.', 1, '2024-10-19 00:05:50', '2024-10-19 00:05:50');
+INSERT INTO Enactive.answers (id, question_id, answer_text, is_correct, created_at, updated_at) VALUES(5, 2, 'A type of data structure.', 0, '2024-10-19 00:05:50', '2024-10-19 00:05:50');
+INSERT INTO Enactive.answers (id, question_id, answer_text, is_correct, created_at, updated_at) VALUES(6, 2, 'An event handler.', 0, '2024-10-19 00:05:50', '2024-10-19 00:05:50');
+
+
+
+order- 
+add courses 
+QUIZ 
+questions 
+answers 

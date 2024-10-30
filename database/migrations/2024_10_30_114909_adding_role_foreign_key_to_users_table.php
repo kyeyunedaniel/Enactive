@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->string('profile_picture')->nullable()->after('email'); // Add profile picture column
-            $table->text('bio')->nullable()->after('profile_picture');              // Add bio column
-            $table->string('phone_number')->nullable()->after('bio');   // Add phone number column
-            $table->unsignedBigInteger('role_id')->nullable()->after('name');           // Make role column nullable
+            $table->foreign('role_id') // Specify the column that is the foreign key
+            ->references('id') // The column in the referenced table (roles)
+            ->on('roles') // The table to reference
+            ->default(1)
+            ->onDelete('set null'); // Optional: set to null if the role is deleted
         });
     }
 
@@ -27,7 +28,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->dropColumn(['profile_picture', 'bio', 'phone_number', 'role_id']);
+            $table->dropForeign(['role_id']);
         });
     }
 };

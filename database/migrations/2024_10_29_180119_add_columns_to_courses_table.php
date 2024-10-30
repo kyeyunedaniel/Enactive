@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::table('courses', function (Blueprint $table) {
             //
-            $table->text('image_url')->nullable();
-            $table->text('video_url')->nullable(); 
-            $table->integer('course_price')->unsigned()->nullable(); 
+            $table->text('image_url')->nullable()->after('description');
+            $table->text('video_url')->nullable()->after('image_url'); 
+            $table->integer('course_price')->unsigned()->nullable()->after('video_url'); 
         });
     }
 

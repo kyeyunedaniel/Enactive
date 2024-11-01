@@ -1,0 +1,85 @@
+INSERT INTO categories (category_name, created_at, updated_at) 
+VALUES 
+    ('Technology', NOW(), NOW()), 
+    ('Business', NOW(), NOW()), 
+    ('Arts', NOW(), NOW()), 
+    ('Health', NOW(), NOW()), 
+    ('Science', NOW(), NOW());
+
+
+
+INSERT INTO users (name, role_id, email, profile_picture, bio, phone_number, email_verified_at, password, remember_token, created_at, updated_at) 
+VALUES 
+    ('Alice Johnson', 1, 'alice@example.com', 'path/to/pic1.jpg', 'AI enthusiast', '123456789', NOW(), 'password_hash', NULL, NOW(), NOW()),
+    ('Bob Smith', 2, 'bob@example.com', 'path/to/pic2.jpg', 'Business strategist', '987654321', NOW(), 'password_hash', NULL, NOW(), NOW()),
+    ('Carlos Santana', 1, 'carlos@example.com', 'path/to/pic3.jpg', 'Art lover', '555123456', NOW(), 'password_hash', NULL, NOW(), NOW());
+
+
+INSERT INTO courses (title, description, image_url, video_url, course_price, created_by, category_id, course_description, course_objectives, intended_for, expected_outcomes, certificate, course_time, created_at, updated_at)
+VALUES 
+    ('Intro to AI', 'An introductory course on AI', 'img1.jpg', 'vid1.mp4', 100, 1, 1, 'Course details...', 'Learn AI basics', 'Beginners', 'Understand AI basics', 1, '10 hours', NOW(), NOW()),
+    ('Business Management', 'Basics of managing a business', 'img2.jpg', 'vid2.mp4', 120, 2, 2, 'Course details...', 'Learn management skills', 'Entrepreneurs', 'Manage a small business', 1, '8 hours', NOW(), NOW()),
+    ('Painting Basics', 'Learn the fundamentals of painting', 'img3.jpg', 'vid3.mp4', 90, 3, 3, 'Course details...', 'Understand color theory', 'Art beginners', 'Paint basic art', 1, '6 hours', NOW(), NOW());
+
+
+INSERT INTO modules (course_id, title, description, order, module_time, created_at, updated_at) 
+VALUES 
+    (1, 'AI Foundations', 'Introduction to AI concepts', 1, '2 hours', NOW(), NOW()),
+    (1, 'Machine Learning Basics', 'Learn the basics of ML', 2, '3 hours', NOW(), NOW()),
+    (2, 'Business Fundamentals', 'Understand the core of business', 1, '2 hours', NOW(), NOW()),
+    (2, 'Financial Management', 'Manage finances effectively', 2, '3 hours', NOW(), NOW()),
+    (3, 'Color Theory', 'Learn about colors', 1, '2 hours', NOW(), NOW()),
+    (3, 'Brush Techniques', 'Explore different techniques', 2, '2 hours', NOW(), NOW());
+
+
+INSERT INTO quizzes (course_id, module_id, title, description, is_active, is_final, created_at, updated_at)
+VALUES 
+    (1, 1, 'AI Foundations Quiz', 'Basic AI concepts', 1, 0, NOW(), NOW()),
+    (1, 2, 'Machine Learning Quiz', 'Intro to ML', 1, 0, NOW(), NOW()),
+    (1, NULL, 'Final AI Course Quiz', 'Covers entire AI course', 1, 1, NOW(), NOW()),
+    (2, 1, 'Business Fundamentals Quiz', 'Basics of business', 1, 0, NOW(), NOW()),
+    (2, NULL, 'Final Business Quiz', 'Entire course quiz', 1, 1, NOW(), NOW()),
+    (3, NULL, 'Painting Course Quiz', 'Quiz on painting basics', 1, 1, NOW(), NOW());
+
+
+INSERT INTO questions (quiz_id, question_text, question_type, created_at, updated_at) 
+VALUES 
+    (1, 'What is AI?', 'multiple_choice', NOW(), NOW()),
+    (1, 'Who is the father of AI?', 'multiple_choice', NOW(), NOW()),
+    (2, 'What is Machine Learning?', 'multiple_choice', NOW(), NOW()),
+    (3, 'What is business management?', 'multiple_choice', NOW(), NOW()),
+    (6, 'Which brush is best for fine detail?', 'multiple_choice', NOW(), NOW());
+
+
+INSERT INTO answers (question_id, answer_text, is_correct, created_at, updated_at) 
+VALUES 
+    (1, 'Artificial Intelligence', 1, NOW(), NOW()),
+    (1, 'Automated Input', 0, NOW(), NOW()),
+    (2, 'John McCarthy', 1, NOW(), NOW()),
+    (2, 'Alan Turing', 0, NOW(), NOW()),
+    (3, 'Subset of AI', 1, NOW(), NOW()),
+    (4, 'Managing business', 1, NOW(), NOW()),
+    (5, 'Detail brush', 1, NOW(), NOW()),
+    (5, 'Flat brush', 0, NOW(), NOW());
+
+
+INSERT INTO user_progress (user_id, course_id, last_module_id, progress_percentage, created_at, updated_at) 
+VALUES 
+    (1, 1, 1, 50, NOW(), NOW()),
+    (2, 2, 2, 100, NOW(), NOW()),
+    (3, 3, 1, 50, NOW(), NOW());
+
+
+INSERT INTO quiz_attempts (user_id, quiz_id, score, completed_at, created_at, updated_at) 
+VALUES 
+    (1, 1, 80, NOW(), NOW(), NOW()),
+    (2, 2, 90, NOW(), NOW(), NOW()),
+    (3, 3, 70, NOW(), NOW(), NOW());
+
+
+INSERT INTO quiz_question_answers (quiz_attempt_id, question_id, answer_id, created_at, updated_at) 
+VALUES 
+    (1, 1, 1, NOW(), NOW()),
+    (1, 2, 1, NOW(), NOW()),
+    (2, 3, 1, NOW(), NOW()),
+    (3, 4, 1, NOW(), NOW());

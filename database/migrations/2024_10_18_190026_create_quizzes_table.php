@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true); // To enable/disable quizzes
+            $table->timestamp('active_from')->nullable(); // Start date for when the quiz is active
+            $table->timestamp('active_to')->nullable(); // End date for when the quiz is active
             $table->timestamps();
         });
     }

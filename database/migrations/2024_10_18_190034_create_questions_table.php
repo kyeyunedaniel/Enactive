@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('quiz_id')->constrained('quizzes')->onDelete('cascade'); // Reference to quizzes table
             $table->text('question_text');
-            $table->enum('question_type', ['multiple_choice', 'true_false'])->default('multiple_choice'); // Question type (could be expanded) multiple_choice,multiple_select,true_false,short_answer,fill_in_the_blank,matching,essay,numeric,ordering,drag_and_drop
+            $table->enum('question_type', ['multiple_choice', 'true_false','short-answer'])->default('multiple_choice'); // Question type (could be expanded) multiple_choice,multiple_select,true_false,short_answer,fill_in_the_blank,matching,essay,numeric,ordering,drag_and_drop
+            $table->boolean('is_active')->default(true); // Disable some questions from front-end
             $table->timestamps();
         });
     }

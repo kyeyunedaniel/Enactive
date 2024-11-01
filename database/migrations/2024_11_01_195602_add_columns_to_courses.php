@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('intended_for')->nullable();
             $table->text('expected_outcomes')->nullable();
             $table->boolean('certificate')->default(false);
-            $table->integer('course_time')->nullable(); // estimated time in minutes or hours
+            $table->string('course_time')->nullable(); // estimated time in minutes or hours
         });
     }
 

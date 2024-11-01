@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->integer('order'); // module order in the course
-            $table->integer('module_time')->nullable(); // estimated time for this module
+            $table->string('module_time')->nullable(); // estimated time for this module
             $table->timestamps();
 
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');

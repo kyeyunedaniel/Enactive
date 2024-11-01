@@ -20,31 +20,31 @@ class QuizSeeder extends Seeder
     {
         {
             // Create a course
-            $course = Course::factory()->create();
+            // $course = Course::factory()->create();
     
-            // Create a quiz for that course
-            $quiz = Quiz::factory()->create([
-                'course_id' => $course->id,
-            ]);
+            // // Create a quiz for that course
+            // $quiz = Quiz::factory()->create([
+            //     'course_id' => $course->id,
+            // ]);
     
-            // Create two questions for the quiz
-            $questions = QuizQuestion::factory(2)->create([
-                'quiz_id' => $quiz->id,
-            ]);
+            // // Create two questions for the quiz
+            // $questions = QuizQuestion::factory(2)->create([
+            //     'quiz_id' => $quiz->id,
+            // ]);
     
-            // Create answers for each question
-            foreach ($questions as $question) {
-                QuizQuestionAnswer::factory(3)->create([
-                    'quiz_question_id' => $question->id,
-                    'is_correct' => false, // Default incorrect answers
-                ]);
+            // // Create answers for each question
+            // foreach ($questions as $question) {
+            //     QuizQuestionAnswer::factory(3)->create([
+            //         'quiz_question_id' => $question->id,
+            //         'is_correct' => false, // Default incorrect answers
+            //     ]);
     
-                // Create one correct answer
-                QuizQuestionAnswer::factory()->create([
-                    'quiz_question_id' => $question->id,
-                    'is_correct' => true, // One correct answer per question
-                ]);
-            }
+            //     // Create one correct answer
+            //     QuizQuestionAnswer::factory()->create([
+            //         'quiz_question_id' => $question->id,
+            //         'is_correct' => true, // One correct answer per question
+            //     ]);
+            // }
         }
     }
 }

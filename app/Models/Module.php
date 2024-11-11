@@ -29,8 +29,19 @@ class Module extends Model
     /**
      * Get the quizzes associated with this module.
      */
+    // public function quizzes()
+    // {
+    //     return $this->hasMany(Quiz::class);
+    // }
+
     public function quizzes()
     {
-        return $this->hasMany(Quiz::class);
+        return $this->hasOne(Quiz::class);
     }
+
+    public function userProgress()
+    {
+        return $this->hasMany(UserProgress::class, 'last_module_id');
+    }
+
 }

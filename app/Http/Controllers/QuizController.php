@@ -28,6 +28,10 @@ class QuizController extends Controller
 
     public function submitQuiz(Request $request, $quiz_id)
     {
+
+        try{
+
+       
         // Validate the incoming request data
         // dd("here"); 
         $request->validate([
@@ -66,7 +70,7 @@ class QuizController extends Controller
         }
     
         // Update the score in the quiz attempt
-        $quizAttempt->update(['score' => $score]);
+        // $quizAttempt->update(['score' => $score]);
     
         // Optionally return a response
         // return response()->json([
@@ -75,6 +79,8 @@ class QuizController extends Controller
         // ]);
 
         $percentageScore = ($totalQuestions > 0) ? ($score / $totalQuestions) * 100 : 0; // Avoid division by zero
+         
+        $quizAttempt->update(['score' => $percentageScore]);
 
         // return Inertia::render(route('quiz.results', ['quiz_id' => $quiz_id, 'score' => $score]));
         return Inertia::render('Quiz/QuizResults', [
@@ -84,6 +90,16 @@ class QuizController extends Controller
             'percentage_score'=>$percentageScore,
             'auth'=>auth()->user()
         ]);
+    }catch(\Exception $e){
+        return Inertia::render('Quiz/QuizResults', [
+            'quiz_id' => $quiz_id, 
+            'score' => 0,
+            'total_questions'=>0,
+            'percentage_score'=>0,
+            'auth'=>auth()->user()
+        ]); 
+    }
+
     }
     
     // Example method to check if the answer is correct

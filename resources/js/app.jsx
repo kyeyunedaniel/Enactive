@@ -4,8 +4,9 @@ import '../css/app.css';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { CartProvider } from './Context/CartContext';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Enactive';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -13,7 +14,11 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <CartProvider>
+        <App {...props} />
+        </CartProvider> 
+    );
     },
     progress: {
         color: '#4B5563',

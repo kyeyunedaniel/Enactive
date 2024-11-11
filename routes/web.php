@@ -10,6 +10,7 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AllContentController;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,8 +82,14 @@ Route::prefix('content-view')->group(function () {
     Route::get('/',[AllContentController::class, 'AllContent'])->name('content-view.home');
     Route::get('/view-course/{item}',[AllContentController::class, 'ViewCourse'])->name('content-view.course');
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index.2');
+    Route::post('/mark-module-complete', [AllContentController::class, 'updateProgress'])->name('update-module-progress');
 
 });
+// Passport::refreshTokensExpireIn(Carbon::now()->addDays(30));
+Route::prefix('cart')->group(function () {
+    Route::get('/view_cart', [CartController::class, 'index'])->name('cart-view.index');
+});
+
 require __DIR__.'/auth.php';
 
 

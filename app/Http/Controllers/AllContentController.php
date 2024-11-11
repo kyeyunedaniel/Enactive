@@ -7,6 +7,7 @@ use App\Models\Course;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\UserProgress;
+use App\Models\Category; 
 
 class AllContentController extends Controller
 {
@@ -14,10 +15,13 @@ class AllContentController extends Controller
     public function AllContent(){
         $courses = Course::get();
         $auth=Auth::user();
+        $categories = Category::get();
+        // dd($categories); 
         // dd($courses);
         return Inertia::render('ContentViews/HardcodedCatalogComponent',[
             'auth' => $auth,
-            'courses'=>$courses
+            'courses'=>$courses,
+            'categories'=>$categories,
         ]);  
     }
 //     public function ViewCourse($course_id)

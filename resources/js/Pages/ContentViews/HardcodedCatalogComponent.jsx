@@ -3,7 +3,7 @@ import { Link, Head } from "@inertiajs/react";
 import PageHeaderUnauthenticated from "../PageHeaderUnauthenticated";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-const HardcodedCatalogComponent = ({ auth, courses }) => {
+const HardcodedCatalogComponent = ({ auth, courses,categories }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,14 +16,16 @@ const HardcodedCatalogComponent = ({ auth, courses }) => {
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
+    console.log(e.target.value); 
     setCurrentPage(1); // Reset to first page on category change
   };
 
   // Filter the courses based on search and selected category
   const filteredItems = courses.filter(
+    // console.log(selectedCategory)
     (item) =>
       item.title.toLowerCase().includes(search.toLowerCase()) &&
-      (selectedCategory === "All" || item.category === selectedCategory)
+      (selectedCategory === "All" || item?.category_id === parseInt(selectedCategory) ) //we are using the id of the categories to create a match, no the names. 
   );
 
   // Calculate the total number of pages
@@ -35,6 +37,8 @@ const HardcodedCatalogComponent = ({ auth, courses }) => {
 
   useEffect(() => {
     console.log("hardcodedCatalog Component " + JSON.stringify(auth));
+    console.log("categories "+JSON.stringify(categories));
+    console.log("courses "+JSON.stringify(courses));
   }, []);
 
   const CatalogContent = (
@@ -65,8 +69,14 @@ const HardcodedCatalogComponent = ({ auth, courses }) => {
             >
               <option value="All">All</option>
               {/* Dynamically generate categories from courses if necessary */}
-              <option value="Medical">Medical</option>
-              <option value="Safety">Safety</option>
+              {/* <option value="Medical">Medical</option>
+              <option value="Safety">Safety</option> */}
+             {/* Dynamically generate categories from the passed 'categories' prop */}
+        {categories?.map((category, index) => (
+          <option key={category?.index} value={category?.id}>
+            {category?.category_name}
+          </option>
+        ))}
             </select>
           </div>
         </div>

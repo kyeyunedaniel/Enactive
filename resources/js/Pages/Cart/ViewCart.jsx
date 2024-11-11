@@ -26,18 +26,19 @@ function ViewCart({ auth }) {
                                 <li key={item.product_id} className="flex items-center justify-between py-4">
                                     <div>
                                         <h2 className="text-xl font-medium">{item.name}</h2>
-                                        <p className="text-gray-500">${item.price.toFixed(2)} each</p>
+                                        <p className="text-gray-500">{item.price.toFixed(2)}</p>
                                     </div>
                                     <div className="flex items-center space-x-4">
                                         {/* Quantity Update */}
                                         <input
                                             type="number"
                                             min="1"
+                                            max="1"
                                             value={item.quantity}
                                             onChange={(e) => updateCartItemQuantity(item.product_id, parseInt(e.target.value))}
                                             className="w-16 border rounded text-center"
                                         />
-                                        <p className="text-lg font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                                        <p className="text-lg font-medium">{(item.price * item.quantity).toFixed(2)}</p>
                                         {/* Remove Item Button */}
                                         <button
                                             onClick={() => removeFromCart(item.product_id)}
@@ -51,7 +52,7 @@ function ViewCart({ auth }) {
                         </ul>
 
                         <div className="text-right">
-                            <p className="text-2xl font-semibold">Total: ${calculateTotal().toFixed(2)}</p>
+                            <p className="text-2xl font-semibold">Total: $ {calculateTotal().toFixed(2)}</p>
                             <button className="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                                 Proceed to Checkout
                             </button>

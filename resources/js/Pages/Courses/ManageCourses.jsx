@@ -1,15 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Link, Head } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 
-const ManageCourses = ({ courses, auth, flash }) => {
+const ManageCourses = ({ courses, auth, flash, categories, failure, success, response_message, error_message }) => {
+    useEffect(()=>{
+        console.log(JSON.stringify(categories)); 
+        // console.log("failue"+failure); 
+        // console.log("success"+success);
+        // console.log("extradata  "+kk);
+        if (response_message) {
+            console.log("Session Data", response_message);
+            setSuccessMessage(response_message);
+            setIsSuccessModalOpen(true);
+            resetFields()
+
+            // You can perform any actions with the 'kk' data here
+        }
+        if (error_message) {
+            console.log("Session Data", error_message);
+            setFailureMessage(error_message);
+            setIsFailureModalOpen(true);            
+            // You can perform any actions with the 'kk' data here
+        }
+
+    },[response_message,error_message])
     const { data, setData, post, delete: destroy, processing, errors } = useForm({
         title: '',
         description: '',
+        course_background: '',
         course_price: '',
         image_url: null,
         video_url: null,
+        category_id: '',
+        course_objectives: '',
+        intended_for: '',
+        expected_outcomes: '',
+        certificate: false,
+        course_time: '',
+
     });
 
     const [editingCourseId, setEditingCourseId] = useState(null);
@@ -17,15 +46,28 @@ const ManageCourses = ({ courses, auth, flash }) => {
     const [courseToDelete, setCourseToDelete] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
+    const [failureMessage, setFailureMessage] = useState('');
+
 
     // Handle form submission for adding or updating a course
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log(JSON.stringify(data)); 
 
+        // return ''; 
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('description', data.description);
         formData.append('course_price', data.course_price);
+        formData.append('category_id', data.category_id);
+        formData.append('course_background', data.course_background);
+        formData.append('course_objectives', data.course_objectives);
+        formData.append('intended_for', data.intended_for);
+        formData.append('expected_outcomes', data.expected_outcomes);
+        formData.append('certificate', data.certificate);
+        formData.append('course_time', data.course_time);
+
         if (data.image_url) formData.append('image_url', data.image_url);
         if (data.video_url) formData.append('video_url', data.video_url);
 
@@ -35,9 +77,9 @@ const ManageCourses = ({ courses, auth, flash }) => {
             post(route('courses.update', editingCourseId), {
                 data: formData,
                 onSuccess: () => {
-                    resetFields();
-                    setSuccessMessage('Course updated successfully!');
-                    setIsSuccessModalOpen(true);
+                    // resetFields();
+                    // setSuccessMessage('Course updated successfully!');
+                    // setIsSuccessModalOpen(true);
                 },
                 forceFormData: true,
             });
@@ -45,9 +87,9 @@ const ManageCourses = ({ courses, auth, flash }) => {
             post(route('courses.store'), {
                 data: formData,
                 onSuccess: () => {
-                    resetFields();
-                    setSuccessMessage('Course added successfully!');
-                    setIsSuccessModalOpen(true);
+                    // resetFields();
+                    // setSuccessMessage('Course added successfully!');
+                    // setIsSuccessModalOpen(true);
                 },
                 forceFormData: true,
             });
@@ -60,16 +102,23 @@ const ManageCourses = ({ courses, auth, flash }) => {
             ...prevData,
             title: course.title,
             description: course.description,
+            course_background: course.course_background,
             course_price: course.course_price,
             image_url: course.image_url, // Reset image for editing
             video_url: course.video_url, // Reset video for editing
+            category_id: course.category_id,
+            course_objectives: course.course_objectives,
+            intended_for: course.intended_for,
+            expected_outcomes: course.expected_outcomes,
+            certificate: course.certificate,
+            course_time: course.course_time,
         }));
         setEditingCourseId(course.id);
     };
 
     // Reset form fields
     const resetFields = () => {
-        setData({ title: '', description: '', course_price: '', image_url: null, video_url: null });
+        setData({ title: '', description: '', course_price: '', image_url: null, video_url: null,category_id:'',course_background:'',course_objectives:'',intended_for:'',expected_outcomes:'',course_time:'',certificate:false });
         setEditingCourseId(null);
     };
 
@@ -114,6 +163,39 @@ const ManageCourses = ({ courses, auth, flash }) => {
                             />
                             {errors.title && <div className="text-red-600">{errors.title}</div>}
                         </div>
+
+                        {/* category */}
+                        <div className="mb-4 flex items-center space-x-4">
+                        <div className="w-1/2">
+                            <label className="block text-gray-700">Category</label>
+                            <select
+                                value={data.category_id}
+                                onChange={(e) => setData('category_id', e.target.value)}
+                                className="border rounded px-3 py-2 w-full"
+                                required
+                            >
+                                <option value="">Select Category</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                        {category.category_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                            {/* Certificate */}
+                        <div className="w-1/2">
+                            <label className="block text-gray-700">Certificate</label>
+                            <input
+                                type="checkbox"
+                                checked={data.certificate}
+                                onChange={(e) => setData('certificate', e.target.checked)}
+                                className="mr-2"
+                            />
+                            Issue Certificate
+                        </div>
+                        </div>
+
+
                         <div className="mb-4">
                             <label className="block text-gray-700">Description</label>
                             <textarea
@@ -124,7 +206,36 @@ const ManageCourses = ({ courses, auth, flash }) => {
                             ></textarea>
                             {errors.description && <div className="text-red-600">{errors.description}</div>}
                         </div>
-                        <div className="mb-4">
+
+                        {['course_background','course_objectives', 'intended_for', 'expected_outcomes'].map((field) => (
+                            <div key={field} className="mb-4">
+                                <label className="block text-gray-700">
+                                    {field.replace('_', ' ')}
+                                </label>
+                                <textarea
+                                    value={data[field]}
+                                    onChange={(e) => setData(field, e.target.value)}
+                                    className="border rounded px-3 py-2 w-full"
+                                    rows="3"
+                                ></textarea>
+                            </div>
+                        ))}
+
+                        {/* Course Time */}
+                        <div className="mb-4 flex items-center space-x-4">
+                        <div className="w-1/2">
+                            <label className="block text-gray-700">Course Time (e.g., 10 hours)</label>
+                            <input
+                                type="text"
+                                value={data.course_time}
+                                onChange={(e) => setData('course_time', e.target.value)}
+                                className="border rounded px-3 py-2 w-full"
+                                required
+                            />
+                        </div>
+
+
+                        <div className="w-1/2">
                             <label className="block text-gray-700">Course Price 'UGX'</label>
                             <input
                                 type="number"
@@ -134,6 +245,9 @@ const ManageCourses = ({ courses, auth, flash }) => {
                                 required
                             />
                         </div>
+                        </div>
+
+
                         <div className="mb-4">
                             <label className="block text-gray-700">Image</label>
                             <input
@@ -229,12 +343,29 @@ const ManageCourses = ({ courses, auth, flash }) => {
                     {isSuccessModalOpen && (
                         <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
                             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-                                <h2 className="text-lg font-semibold mb-4">Success</h2>
+                                <h2 className="text-lg font-semibold mb-4 text-green-600">Success</h2>
                                 <p>{successMessage}</p>
                                 <div className="flex justify-end mt-6">
                                     <button
                                         onClick={() => setIsSuccessModalOpen(false)}
                                         className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {isFailureModalOpen && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
+                            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                                <h2 className="text-lg font-semibold mb-4 text-red-600">Error</h2>
+                                <p>{failureMessage}</p>
+                                <div className="flex justify-end mt-6">
+                                    <button
+                                        onClick={() => setIsFailureModalOpen(false)}
+                                        className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
                                     >
                                         Close
                                     </button>

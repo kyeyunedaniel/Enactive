@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Course;
+use App\Models\Category;
 use Inertia\Inertia;
 
 class CourseController extends Controller
@@ -13,12 +14,39 @@ class CourseController extends Controller
     {
         // Fetch all courses
         $courses = Course::all();
-        
+        $categories = Category::get();
+        $response_message = session()->has('message_returned') ? session('message_returned') :'';
+        $error_message = session()->has('error_message') ? session('error_message') :'';
+        // dd($response_message);
+
         return Inertia::render('Courses/ManageCourses', [
             'courses' => $courses,
-            'auth'=>auth()->user()
+            'auth'=>auth()->user(),
+            'categories'=>$categories,
+            'response_message'=>$response_message,
+            'error_message'=>$error_message
         ]);
     }
+
+//     public function index()
+// {
+//     // Fetch all courses
+//     $courses = Course::all();
+//     $categories = Category::get();
+
+//     // Check if session data exists
+//     $extraData = session()->has('message_returned') ? ['response_message' => session('message_returned')] : [];
+//     // dd($extraData);
+
+//     // Merge session data with other data and pass to Inertia
+//     return Inertia::render('Courses/ManageCourses', array_merge([
+//         'courses' => $courses,
+//         'auth' => auth()->user(),
+//         'categories' => $categories,
+//     ], $extraData));
+// }
+
+
 
     public function store(Request $request)
 {
@@ -26,11 +54,18 @@ class CourseController extends Controller
     try {
         // Validate incoming request data
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:255|unique:courses',
             'description' => 'nullable|string',
             'image_url' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate image file
             'video_url' => 'nullable|mimetypes:video/mp4,video/x-msvideo,video/x-matroska,video/quicktime|max:20480', // Validate video file including MOV
-            'course_price'=>'nullable|string'
+            'course_price'=>'nullable|string',
+            'course_background'=>'required|string', 
+            'category_id'=>'required|numeric',
+            'course_objectives'=>'required|string', 
+            'intended_for'=>'nullable|string', 
+            'expected_outcomes'=>'nullable|string',
+            'certificate'=>'required|boolean',
+            'course_time'=>'required|string',
         ]);
 
         // dd('here');
@@ -39,6 +74,14 @@ class CourseController extends Controller
         $description = $request->description;
         $created_by = auth()->user()->id;
         $course_price = $request->course_price;
+        $course_background = $request->course_background;
+        $category_id = $request->category_id;
+        $course_objectives = $request->course_objectives;
+        $intended_for = $request->intended_for;
+        $expected_outcomes = $request->expected_outcomes;
+        $certificate = $request->certificate;
+        $course_time = $request->course_time;
+
 
         // Create a new Course instance
         $course = new Course; 
@@ -46,6 +89,16 @@ class CourseController extends Controller
         $course->description = $description;
         $course->course_price = (int)$course_price;
         $course->created_by = $created_by; 
+
+        $course->course_background = $course_background; 
+        $course->category_id = $category_id; 
+        $course->course_objectives = $course_objectives; 
+        $course->intended_for = $intended_for; 
+        $course->expected_outcomes = $expected_outcomes; 
+        $course->certificate = $certificate; 
+        $course->course_time = $course_time; 
+
+
         
         // Handle the image upload if present
         if ($request->hasFile('image_url')) {
@@ -69,10 +122,12 @@ class CourseController extends Controller
         // Save the course to the database
             $course->save(); 
 
-        return redirect()->route('courses.index')->with('success', 'Course created successfully!');
+        return redirect()->route('courses.index')->with('message_returned', 'Course created successfully!');
     } catch (\Exception $error) {
         // dd($error);
-        return (['error' => $error->getMessage()]); // Return back with error message
+        // return (['error' => $error->getMessage()]); // Return back with error message
+        return redirect()->route('courses.index')->with('error_message', $error->getMessage());
+        
     }
 }
 
@@ -87,6 +142,13 @@ public function update(Request $request, $course_id)
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'course_price' => 'nullable|string',
+            'course_background'=>'required|string', 
+            'category_id'=>'required|numeric',
+            'course_objectives'=>'required|string', 
+            'intended_for'=>'nullable|string', 
+            'expected_outcomes'=>'nullable|string',
+            'certificate'=>'required|boolean',
+            'course_time'=>'required|string',
         ];
 
         // Validate image_url based on whether it's an upload or a URL
@@ -108,6 +170,15 @@ public function update(Request $request, $course_id)
         $course->title = $request->input('title');
         $course->description = $request->input('description');
         $course->course_price = (int)$request->course_price;
+        $course->course_background = $request->course_background;
+        $course->category_id = $request->category_id;
+        $course->course_objectives = $request->course_objectives;
+        $course->intended_for = $request->intended_for;
+        $course->expected_outcomes = $request->expected_outcomes;
+        $course->certificate = $request->certificate;
+        $course->course_time = $request->course_time;
+
+
 
         // Handle the image upload if a new image is present
         if ($request->hasFile('image_url')) {
@@ -149,15 +220,18 @@ public function update(Request $request, $course_id)
         // Save the updated course to the database
         $course->save();
 
-        return redirect()->route('courses.index')->with('success', 'Course updated successfully!');
+        return redirect()->route('courses.index')->with('message_returned', 'Course updated successfully!');
     } catch (\Exception $error) {
-        return response()->json(['error' => $error->getMessage()]); // Return with error message
+        // return response()->json(['error' => $error->getMessage()]); // Return with error message
+        return redirect()->route('courses.index')->with('error_message', $error->getMessage());
     }
 }
 
 
 public function destroy(Course $course)
+
 {
+    try{
     // Delete the associated image if it exists
     if ($course->image_url) {
         $imagePath = str_replace(url('storage/'), 'storage/', $course->image_url); // Adjust the URL to file path
@@ -177,6 +251,10 @@ public function destroy(Course $course)
     // Delete the course record from the database
     $course->delete();
 
-    return redirect()->route('courses.index')->with('success', 'Course deleted successfully!');
+    return redirect()->route('courses.index')->with('message_returned', 'Course deleted successfully!');
+
+}catch(\Exceprion $error){
+    return redirect()->route('courses.index')->with('error_message', $error->getMessage());
+    }
 }
 }

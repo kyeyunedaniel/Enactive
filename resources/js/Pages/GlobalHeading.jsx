@@ -23,6 +23,12 @@ const GlobalHeading = () => {
                             </NavLink>
                         </li>
                         <li>
+                            <NavLink href={route('content-map-view')} active={route().current('content-map-view')}>
+                                React Map
+                            </NavLink>
+                        </li>
+
+                        <li>
                             <NavLink href={route('content-view.home')} active={route().current('courses.index')}>
                                 Portfolio
                             </NavLink>

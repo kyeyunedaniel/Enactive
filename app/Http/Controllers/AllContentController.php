@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\UserProgress;
 use App\Models\Category; 
+use File; 
 
 class AllContentController extends Controller
 {
@@ -196,5 +197,116 @@ public function updateProgresss(Request $request)
 //         'message' => $message,
 //     ]);
 // }
+
+// public function indexMap()
+// {
+//     // Construct the full path to the GeoJSON file
+//     // $geojsonPath = base_path("/storage/app/public/geojson/map-data.geojson");
+//     $geojsonPath = base_path("/storage/app/public/geojson/Districts_UG.geojson");
+
+//     // Check if the file exists
+//     if (!File::exists($geojsonPath)) {
+//         return Inertia::render('Map/Index', [
+//             'auth' => [
+//                 'user' => auth()->user(),
+//             ],
+//             'pageTitle' => 'GeoJSON Map',
+//             'geojsonData' => null,
+//             'error' => 'GeoJSON file not found'
+//         ]);
+//     }
+
+//     try {
+//         // Read the file contents
+//         $geojsonData = File::get($geojsonPath);
+        
+//         // Decode the JSON data
+//         $decodedData = json_decode($geojsonData, true);
+
+//         // Render the Inertia page with GeoJSON data
+//         return Inertia::render('Map/Index', [
+//             'auth' => [
+//                 'user' => auth()->user(),
+//             ],
+//             'pageTitle' => 'GeoJSON Map',
+//             'geojsonData' => $decodedData
+//         ]);
+//     } catch (\Exception $e) {
+//         // Handle any errors in reading or parsing the file
+//         return Inertia::render('Map/Index', [
+//             'auth' => [
+//                 'user' => auth()->user(),
+//             ],
+//             'pageTitle' => 'GeoJSON Map',
+//             'geojsonData' => null,
+//             'error' => 'Error reading GeoJSON file: ' . $e->getMessage()
+//         ]);
+//     }
+// }
+
+// app/Http/Controllers/MapController.php
+public function indexMap()
+{
+    $geojsonPath = base_path("/storage/app/public/geojson/Districts_UG.geojson");
+    
+    if (!File::exists($geojsonPath)) {
+        return $this->renderError('GeoJSON file not found');
+    }
+
+    try {
+        $geojsonData = $this->processUgandaGisGeoJson($geojsonPath);
+        
+        return Inertia::render('Map/Index', [
+            'auth' => ['user' => auth()->user()],
+            'pageTitle' => 'Uganda Districts Map',
+            'geojsonData' => $geojsonData
+        ]);
+    } catch (\Exception $e) {
+        return $this->renderError('Error processing GeoJSON: ' . $e->getMessage());
+    }
+}
+
+private function processUgandaGisGeoJson($path)
+{
+    $data = json_decode(File::get($path), true);
+    
+    // Extract and transform relevant properties
+    foreach ($data['features'] as &$feature) {
+        $feature['properties'] = [
+            'id' => $feature['id'] ?? $feature['properties']['FID'] ?? null,
+            'district' => $feature['properties']['District'] ?? 'Unknown District',
+            'region' => $feature['properties']['Region'] ?? 'Unknown Region',
+            'subregion' => $feature['properties']['Subregion'] ?? null,
+            'status' => $feature['properties']['Status'] ?? null
+        ];
+    }
+    
+    return $data;
+}
+
+private function getSimplifiedGeoJson($path)
+{
+    $data = json_decode(File::get($path), true);
+    
+    // Simplify features - keep only essential properties
+    foreach ($data['features'] as &$feature) {
+        $feature['properties'] = [
+            'name' => $feature['properties']['DISTRICT'] ?? 'Unnamed',
+            // Add other essential properties here
+        ];
+    }
+    
+    return $data;
+}
+
+private function renderError($message)
+{
+    return Inertia::render('Map/Index', [
+        'auth' => ['user' => auth()->user()],
+        'pageTitle' => 'GeoJSON Map',
+        'geojsonData' => null,
+        'error' => $message
+    ]);
+}
 
 }

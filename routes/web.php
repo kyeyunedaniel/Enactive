@@ -92,6 +92,8 @@ Route::prefix('content-view')->group(function () {
     // Route::get('/', 'AllContentController@AllContent')->name('content-view.home');
 
     Route::get('/',[AllContentController::class, 'AllContent'])->name('content-view.home');
+    Route::get('/geojson-data', [AllContentController::class, 'indexMap'])->name('content-map-view');
+
     Route::get('/view-course/{item}',[AllContentController::class, 'ViewCourse'])->name('content-view.course');
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index.2');
     Route::post('/mark-module-complete', [AllContentController::class, 'updateProgress'])->name('update-module-progress');

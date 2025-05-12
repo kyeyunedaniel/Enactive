@@ -13,45 +13,20 @@ class AllContentController extends Controller
 {
     //
     public function AllContent(){
-        $courses = Course::get();
+        $courses = Course::get(); //( select * from courses )
         $auth=Auth::user();
         $categories = Category::get();
         // dd($categories); 
         // dd($courses);
-        return Inertia::render('ContentViews/HardcodedCatalogComponent',[
+        return Inertia::render('ContentViews/HardcodedCatalogComponent',
+        [
             'auth' => $auth,
             'courses'=>$courses,
             'categories'=>$categories,
-        ]);  
+        ]
+    );  
     }
-//     public function ViewCourse($course_id)
-// {
-//     // Retrieve the authenticated user
-//     $auth = Auth::user();
-//     // dd($auth->id);
 
-//     // Check if the user is authenticated and fetch data accordingly
-//     $course = Course::with([
-//         'modules.quizzes.quizAttempts' => function ($query) use ($auth) {
-//             // Only fetch quiz attempts by the authenticated user if they are logged in
-//             if ($auth) {
-//                 $query->where('user_id', $auth->id);
-//             }
-//         },
-//         'modules.userProgress' => function ($query) use ($auth) {
-//             // Only fetch user progress for the authenticated user
-//             if ($auth) {
-//                 $query->where('user_id', $auth->id); // assuming userProgress belongs to user
-//             }
-//         }
-//     ])->findOrFail($course_id);
-
-//     // Render the course page with the relevant data
-//     return Inertia::render('Courses/ViewCourse', [
-//         'auth' => $auth,
-//         'course' => $course
-//     ]);
-// }
 
 public function ViewCourse($course_id)
 {

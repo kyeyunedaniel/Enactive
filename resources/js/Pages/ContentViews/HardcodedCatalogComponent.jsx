@@ -3,7 +3,7 @@ import { Link, Head } from "@inertiajs/react";
 import PageHeaderUnauthenticated from "../PageHeaderUnauthenticated";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-const HardcodedCatalogComponent = ({ auth, courses,categories }) => {
+const HardcodedCatalogComponent = ({ auth, courses, categories }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);

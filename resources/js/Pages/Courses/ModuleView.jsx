@@ -4,10 +4,13 @@ import { Link, Head } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 
 const ModuleView = ({ courses, auth, flash, categories, failure, success, response_message, error_message }) => {
+
     
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
     const [failureMessage, setFailureMessage] = useState('');
+    
+
 
     return (
         <>

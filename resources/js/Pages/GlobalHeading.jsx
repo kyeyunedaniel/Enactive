@@ -17,11 +17,11 @@ const GlobalHeading = () => {
                 <nav aria-labelledby="header-navigation">
                     <h2 className="sr-only" id="header-navigation">Header navigation</h2>
                     <ul className="flex space-x-6 text-gray-900">
-                        <li>
+                        {/* <li>
                             <NavLink href={route('content-view.home')} active={route().current('content-view.home')}>
                                 All Content
                             </NavLink>
-                        </li>
+                        </li> */}
                         <li>
                             <NavLink href={route('content-map-view')} active={route().current('content-map-view')}>
                                 React Map

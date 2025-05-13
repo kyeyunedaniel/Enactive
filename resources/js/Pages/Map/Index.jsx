@@ -492,11 +492,21 @@ const UgandaDistrictsMap = ({ geojsonData, auth, pageTitle }) => {
               // Using OpenStreetMap standard tile layer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+
+
+
               // Optional: Add Mapbox or other tile layers if you have tokens/styles
               // url="https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
               // attribution='Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
               // id='mapbox/streets-v11' // Example style ID
               // accessToken="YOUR_MAPBOX_ACCESS_TOKEN" // Replace with your token
+              
+              
+              // url="https://{s}.tiles.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}"
+              // attribution='Uganda Map Data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+              id="your-style-id"
+              accessToken="your-access-token"
+            
             />
 
              {/* Scale Control */}

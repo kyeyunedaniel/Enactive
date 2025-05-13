@@ -27,6 +27,11 @@ const GlobalHeading = () => {
                                 React Map
                             </NavLink>
                         </li>
+                        <li>
+                            <NavLink href={route('content-video-show')} active={route().current('content-video-show')}>
+                                Agora
+                            </NavLink>
+                        </li>
 
                         <li>
                             <NavLink href={route('content-view.home')} active={route().current('courses.index')}>

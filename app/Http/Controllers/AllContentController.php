@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use App\Models\UserProgress;
 use App\Models\Category; 
 use File; 
+use Log;
 
 class AllContentController extends Controller
 {
@@ -307,6 +308,16 @@ private function renderError($message)
         'geojsonData' => null,
         'error' => $message
     ]);
+}
+
+public function videoShow(){
+    return Inertia::render("VideoStream/Index",[
+        'auth' => ['user' => auth()->user()],
+        'pageTitle' => 'Super Video Stream ',
+        'AGORA_APP_ID'=>'887019c2881d43b1bd6b3f952ba20113', 
+        "AGORA_TOKEN"=>"007eJxTYHCLcxC6fCfm6VnO3HO5wi9W2ESlOfTueH+ZU4nN9nQ0a74Cg4WFuYGhZbKRhYVhiolxkmFSilmScZqlqVFSopGBoaHx8eXKGQ2BjAzcXTksjAwQCOILM6SkpiWW5pTo5mSWpeoWlxSlJuYyMAAAskAi7Q=="
+
+    ]); 
 }
 
 }

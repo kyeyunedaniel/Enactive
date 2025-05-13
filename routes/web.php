@@ -93,6 +93,8 @@ Route::prefix('content-view')->group(function () {
 
     Route::get('/',[AllContentController::class, 'AllContent'])->name('content-view.home');
     Route::get('/geojson-data', [AllContentController::class, 'indexMap'])->name('content-map-view');
+    Route::get('/video-show', [AllContentController::class, 'videoShow'])->name('content-video-show');
+
 
     Route::get('/view-course/{item}',[AllContentController::class, 'ViewCourse'])->name('content-view.course');
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index.2');

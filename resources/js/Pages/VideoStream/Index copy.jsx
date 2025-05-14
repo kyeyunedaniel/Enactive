@@ -112,26 +112,19 @@ const Index = ({ auth, pageTitle, AGORA_APP_ID, AGORA_TOKEN }) => {
             if (mediaType === 'audio' && user.audioTrack) user.audioTrack.play();
         } catch (e) { console.error(`Subscribe failed for ${user.uid}:`, e); }
     };
-
-
-
     const handleUserUnpublished = (user, mediaType) => {
-    console.log(`Remote user ${user.uid} unpublished ${mediaType}`);
-    setRemoteUsers(prev => {
-        const newUsers = { ...prev };
-        if (newUsers[user.uid]) {
-            // Create a new user object instead of modifying the existing one
-            newUsers[user.uid] = {
-                ...newUsers[user.uid],
-                [mediaType === 'video' ? 'videoTrack' : 'audioTrack']: null
-            };
-        }
-        return newUsers;
-    });
-};
-
-
-
+        console.log(`Remote user ${user.uid} unpublished ${mediaType}`);
+        // Logic to stop playback or update UI for this user
+        setRemoteUsers(prev => {
+            const updatedUser = prev[user.uid];
+            if (updatedUser) {
+                if (mediaType === 'video') updatedUser.videoTrack = null; // Or stop and remove
+                if (mediaType === 'audio') updatedUser.audioTrack = null;
+                return { ...prev, [user.uid]: updatedUser };
+            }
+            return prev;
+        });
+    };
     const handleUserLeft = (user) => {
         console.log(`Remote user ${user.uid} left`);
         setRemoteUsers(prev => {
@@ -406,43 +399,21 @@ const Index = ({ auth, pageTitle, AGORA_APP_ID, AGORA_TOKEN }) => {
                             )}
 
                             {/* Remote Videos */}
-                        {/* // Add viewer count display near the remote videos section */}
                             <div className={role === 'host' ? "md:col-span-1" : "md:col-span-2"}>
-                                <div className="flex justify-between items-center mb-2">
-                                    <h4 className="text-xl font-semibold text-gray-700">
-                                        {role === 'host' ? 'Viewers' : 'Live Stream'}
-                                    </h4>
-                                    {role === 'host' && (
-                                        <span className="bg-blue-500 text-white text-sm px-3 py-1 rounded-full">
-                                            {Object.keys(remoteUsers).length} viewer(s)
-                                        </span>
-                                    )}
-                                </div>
+                                <h4 className="text-xl font-semibold mb-2 text-gray-700">{role === 'host' ? 'Viewers' : 'Live Stream'}</h4>
                                 {Object.values(remoteUsers).filter(u => u.videoTrack).length === 0 ? (
                                     <div className="p-4 text-center text-gray-500">
-                                        {role === 'host' 
-                                            ? "Waiting for viewers to join..." 
-                                            : "Host has not started video or no one is streaming."}
+                                        {role === 'host' ? "Waiting for viewers to join..." : "Host has not started video or no one is streaming."}
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {Object.values(remoteUsers).map(user => (
-                                            <div key={user.uid} className="bg-gray-700 p-2 rounded-lg shadow">
-                                                <p className="text-sm text-white mb-1">Viewer: {user.uid}</p>
-                                                <div 
-                                                    id={`remote-player-${user.uid}`} 
-                                                    className="w-full aspect-video bg-black rounded overflow-hidden"
-                                                >
-                                                    {!user.videoTrack && (
-                                                        <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                                                            <span className="text-gray-400">Camera is off</span>
-                                                        </div>
-                                                    )}
+                                            user.videoTrack && user.uid && (
+                                                <div key={user.uid} className="bg-gray-700 p-2 rounded-lg shadow">
+                                                    <p className="text-sm text-white mb-1">Viewer: {user.uid}</p>
+                                                    <div id={`remote-player-${user.uid}`} className="w-full aspect-video bg-black rounded overflow-hidden"></div>
                                                 </div>
-                                                {user.audioTrack && !user.audioTrack.enabled && (
-                                                    <p className="text-xs text-red-400 mt-1">Audio muted</p>
-                                                )}
-                                            </div>
+                                            )
                                         ))}
                                     </div>
                                 )}

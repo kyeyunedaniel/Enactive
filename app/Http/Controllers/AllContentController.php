@@ -311,6 +311,7 @@ private function renderError($message)
 }
 
 public function videoShow(){
+    // dd("here ");
     return Inertia::render("VideoStream/Index",[
         'auth' => ['user' => auth()->user()],
         'pageTitle' => 'Super Video Stream ',

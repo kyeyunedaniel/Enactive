@@ -48,16 +48,16 @@ const GlobalHeading = () => {
                                 Subscription
                             </NavLink>
                         </li>
-                        <li>
+                        {/* <li>
                             <NavLink href={route('courses.index')} active={route().current('courses.index')}>
                                 Additional Content
                             </NavLink>
-                        </li>
+                        </li> */}
                     </ul>
                 </nav>
                 
                 {/* Cart Icon with Item Count */}
-                <div className="relative">
+                {/* <div className="relative">
                     <NavLink href={route('cart-view.index')} className="text-gray-900 hover:text-gray-600">
                         <FaShoppingCart size={24} />
                         {cartItemCount > 0 && (
@@ -66,7 +66,7 @@ const GlobalHeading = () => {
                             </span>
                         )}
                     </NavLink>
-                </div>
+                </div> */}
             </div>
         </header>
     );

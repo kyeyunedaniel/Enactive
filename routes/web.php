@@ -25,12 +25,15 @@ use App\Http\Controllers\CartController;
 */
 
 Route::get('/', function () {
+    // dd(Auth::user()->name); 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
-        'auth'=>Auth::user(),
+        'auth' => [
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+        ],
         'header'=>'Welcome'
     ]);
 });

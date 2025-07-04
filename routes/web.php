@@ -36,6 +36,7 @@ Route::get('/', function () {
         ],
         'header'=>'Welcome'
     ]);
+    // return redirect()->route('dashboard.home');
 });
 
 Route::get('/dashboard', function () {

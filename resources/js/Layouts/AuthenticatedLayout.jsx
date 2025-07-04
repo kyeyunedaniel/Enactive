@@ -92,7 +92,7 @@ const SidebarSectionTitle = ({ children }) => (
 const SidebarContent = ({ user }) => (
     <div className="flex flex-col h-full">
         <div className="p-4 border-b border-gray-200">
-            <Link href={route('dashboard')} className="flex items-center space-x-2 text-green-600">
+            <Link href={route('dashboard.home')} className="flex items-center space-x-2 text-green-600">
                 <FuelIcon className="w-8 h-8" />
                 <span className="font-bold text-2xl">CreatorFuel</span>
             </Link>
@@ -267,7 +267,7 @@ export default function AuthenticatedLayout({ user, header, children, showPayout
                                         <div className="ml-3 flex-1 md:flex md:justify-between">
                                             <p className="text-sm text-green-800">Please link your payout method, it only takes a few minutes.</p>
                                             <p className="mt-3 text-sm md:ml-6 md:mt-0">
-                                                <Link href={route('dashboard')} className="whitespace-nowrap font-medium text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-full">
+                                                <Link href={route('onboarding.user')} className="whitespace-nowrap font-medium text-white bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-full">
                                                     Complete setup
                                                 </Link>
                                             </p>

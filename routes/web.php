@@ -47,8 +47,34 @@ Route::get('/home', function () {
 })->middleware(['auth', 'verified'])->name('dashboard.home');
 
 Route::get('/explore', function () {
-    return Inertia::render('DashboardScreens/Explore'); //Pages/DashboardScreens/HomeScreen.jsx
+    return Inertia::render('DashboardScreens/Explore'); //Pages/DashboardScreens/Explore.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.explore');
+
+Route::get('/support', function () {
+    return Inertia::render('DashboardScreens/ButtonsAndGraphics',[
+        'auth' => [
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+        ]
+    ]); //Pages/DashboardScreens/Support.jsx
+})->middleware(['auth', 'verified'])->name('dashboard.buttons&grahics');
+
+
+Route::get('/settings', function () {
+    return Inertia::render('DashboardScreens/Settings',[
+        'auth' => [
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+        ]
+    ]); //Pages/DashboardScreens/Support.jsx
+})->middleware(['auth', 'verified'])->name('dashboard.settings');
+
+
+Route::get('/buttons&graphics', function () {
+    return Inertia::render('DashboardScreens/Supporters',[
+        'auth' => [
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+        ]
+    ]); //Pages/DashboardScreens/Support.jsx
+})->middleware(['auth', 'verified'])->name('dashboard.support');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

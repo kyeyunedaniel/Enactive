@@ -42,6 +42,14 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/home', function () {
+    return Inertia::render('DashboardScreens/HomeScreen'); //Pages/DashboardScreens/HomeScreen.jsx
+})->middleware(['auth', 'verified'])->name('dashboard.home');
+
+Route::get('/explore', function () {
+    return Inertia::render('DashboardScreens/Explore'); //Pages/DashboardScreens/HomeScreen.jsx
+})->middleware(['auth', 'verified'])->name('dashboard.explore');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

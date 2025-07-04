@@ -112,29 +112,30 @@ const SidebarContent = ({ user }) => (
             <SidebarNavLink href={route('dashboard.support')} active={route().current('dashboard.support')} icon={<HeartIcon className="w-5 h-5" />}>
                 Supporters
             </SidebarNavLink>
-            <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<LockClosedIcon className="w-5 h-5" />}>
+            {/* <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<LockClosedIcon className="w-5 h-5" />}>
                 Memberships
-            </SidebarNavLink>
-            <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<ShoppingBagIcon className="w-5 h-5" />}>
+            </SidebarNavLink> */}
+
+            {/* <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<ShoppingBagIcon className="w-5 h-5" />}>
                 Shop
-            </SidebarNavLink>
-            <SidebarDropdown
+            </SidebarNavLink> */}
+            {/* <SidebarDropdown
                 title="Publish"
                 icon={<PencilSquareIcon className="w-5 h-5" />}
                 active={route().current('posts.*') || route().current('gallery.*')}
             >
                 <SidebarNavLink href={route('dashboard')} active={route().current('posts.*')}>Posts</SidebarNavLink>
                 <SidebarNavLink href={route('dashboard')} active={route().current('gallery.*')}>Gallery</SidebarNavLink>
-            </SidebarDropdown>
+            </SidebarDropdown> */}
 
             <SidebarSectionTitle>Settings</SidebarSectionTitle>
             <SidebarNavLink href={route('dashboard.buttons&grahics')} active={route().current('dashboard.buttons&grahics')} icon={<CodeBracketIcon className="w-5 h-5" />}>
                 Buttons & Graphics
             </SidebarNavLink>
-            <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<BoltIcon className="w-5 h-5" />}>
+            {/* <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<BoltIcon className="w-5 h-5" />}>
                 Integrations
-            </SidebarNavLink>
-            <SidebarNavLink href={route('dashboard')} active={route().current('dashboard')} icon={<CreditCardIcon className="w-5 h-5" />}>
+            </SidebarNavLink> */}
+            <SidebarNavLink href={route('dashboard.payout')} active={route().current('dashboard.payout')} icon={<CreditCardIcon className="w-5 h-5" />}>
                 Payouts
             </SidebarNavLink>
             <SidebarNavLink href={route('dashboard.settings')} active={route().current('dashboard.settings')} icon={<Cog6ToothIcon className="w-5 h-5" />}>

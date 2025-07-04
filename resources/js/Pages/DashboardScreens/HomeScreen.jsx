@@ -39,6 +39,7 @@ const ActionCard = ({ title, description, buttonText, href, icon }) => (
     </Link>
 );
 
+const formatCurrency = (amount) => new Intl.NumberFormat('en-US').format(amount);
 
 export default function HomeScreen({ auth }) {
     // These values would typically come from your controller/backend.
@@ -82,7 +83,7 @@ export default function HomeScreen({ auth }) {
                             <ChevronDownIcon className="w-4 h-4 ml-2 text-gray-500" />
                         </button>
                     </div>
-                    <p className="text-5xl font-extrabold text-gray-900">UGX {totalEarnings.toFixed(2)}</p>
+                    <p className="text-5xl font-extrabold text-gray-900">UGX {formatCurrency(totalEarnings)}</p>
                     <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
                         <span className="flex items-center"><span className="w-2.5 h-2.5 bg-yellow-300 rounded-full mr-2"></span>UGX 0 Supporters</span>
                         <span className="flex items-center"><span className="w-2.5 h-2.5 bg-pink-300 rounded-full mr-2"></span>UGX 0 Membership</span>

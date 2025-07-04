@@ -75,6 +75,14 @@ Route::get('/payouts', function () {
     ]); //Pages/DashboardScreens/Support.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.payout');
 
+Route::get('/onboarding', function () {
+    return Inertia::render('Onboarding',[
+        'auth' => [
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+        ]
+    ]); //Pages/Onboarding.jsx
+})->middleware(['auth', 'verified'])->name('onboarding.user');
+
 
 Route::get('/buttons&graphics', function () {
     return Inertia::render('DashboardScreens/Supporters',[

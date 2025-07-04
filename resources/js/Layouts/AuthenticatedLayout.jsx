@@ -223,10 +223,12 @@ export default function AuthenticatedLayout({ user, header, children, showPayout
                                 </button>
                                 
                                 <div className="flex items-center gap-x-4">
+                                    <Link href={route('onboarding.user')} >
                                     <button type="button" className="hidden sm:flex items-center gap-x-2 rounded-full bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700">
                                         <ShareIcon className="-ml-0.5 h-5 w-5" />
                                         Share page
                                     </button>
+                                    </Link>
                                     <Dropdown>
                                         <Dropdown.Trigger>
                                              <button className="flex items-center p-1.5 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">

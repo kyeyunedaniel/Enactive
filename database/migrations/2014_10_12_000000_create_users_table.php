@@ -29,7 +29,7 @@ return new class extends Migration
             
             // Unique public identifier (required at registration)
             // Case-insensitive public_url_name with optimized indexing
-            $table->string('public_url_name')->nullable()
+            $table->string('public_url_name')
                 ->collation('utf8mb4_unicode_ci') // Case-insensitive collation
                 ->unique()
                 ->index('idx_public_url_name_ci'); // Named index for monitoring

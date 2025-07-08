@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AllContentController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\FrontEndValidationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,8 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'verified'])->prefix('user')->group(function () {
     Route::get('/',[UserController::class, 'show'] )->name('user.index');
 });
+
+Route::post('/check_public_url_availability', [FrontEndValidationController::class, 'checkUsername'])->name('validate.checkUsername'); 
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

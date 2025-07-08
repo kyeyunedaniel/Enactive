@@ -79,7 +79,7 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
-        username: '', // Add username to the form data
+        username: '', // Add username to the form data, 
     });
 
     useEffect(() => {
@@ -90,41 +90,66 @@ export default function Register() {
 
     // Debounced function to check username availability
     const checkUsername = useCallback(
-        debounce(async (name) => {
-            if (name.length < 4) {
-                setUsernameStatus({ loading: false, message: 'Must be at least 4 characters.', isAvailable: false });
-                return;
-            }
-            if (name.length > 30) {
-                setUsernameStatus({ loading: false, message: 'Must be 30 characters or less.', isAvailable: false });
-                return;
-            }
+    debounce(async (name) => {
+      if (name.length < 4) {
+        setUsernameStatus({ 
+          loading: false, 
+          message: 'Must be at least 4 characters.', 
+          isAvailable: false 
+        });
+        return;
+      }
 
-            setUsernameStatus({ loading: true, message: '', isAvailable: false });
-            try {
-                // IMPORTANT: Assumes you have a '/check-username' route
-                const response = await fetch('/check-username', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ username: name }),
-                });
-                const result = await response.json(); // Expects { "available": true/false }
+      if (name.length > 30) {
+        setUsernameStatus({ 
+          loading: false, 
+          message: 'Must be 30 characters or less.', 
+          isAvailable: false 
+        });
+        return;
+      }
 
-                if (result.available) {
-                    setUsernameStatus({ loading: false, message: 'Available!', isAvailable: true });
-                } else {
-                    setUsernameStatus({ loading: false, message: 'This username is taken. Try another.', isAvailable: false });
-                }
-            } catch (error) {
-                setUsernameStatus({ loading: false, message: 'Error checking username. Please try again.', isAvailable: true });
-            }
-        }, 500), // 500ms delay
-        []
-    );
+      setUsernameStatus({ loading: true, message: '', isAvailable: false });
 
+      try {
+        const response = await axios.post('/check_public_url_availability', { 
+          username: name 
+        });
+
+        setUsernameStatus({
+          loading: false,
+          message: response.data.available ? 'Available!' : 'This username is taken.',
+          isAvailable: response.data.available
+        });
+      } catch (error) {
+        setUsernameStatus({
+          loading: false,
+            message: getFriendlyErrorMessage(error),
+          isAvailable: false
+        });
+      }
+    }, 500),
+    []
+  );
+
+  const getFriendlyErrorMessage = (error) => {
+    if (error.response) {
+      // Server responded with error status
+      switch (error.response.status) {
+        case 422: 
+          return error.response.data?.message || 'Username is unavailable';
+        case 409:
+          return 'Username is unavailable';
+        case 500:
+          return 'Server error. Please try again later';
+        default:
+          return 'Could not check username availability';
+      }
+    } else if (error.request) {
+      return 'Network error. Please check your connection';
+    }
+    return 'Error checking username';
+  };
     useEffect(() => {
         if (username) {
             checkUsername(username);
@@ -141,11 +166,15 @@ export default function Register() {
         }
     };
 
-    const handleDetailsSubmit = (e) => {
-        e.preventDefault();
-        post(route('register'));
-    };
-    
+        const handleDetailsSubmit = (e) => {
+            console.log("username",username+ " and. "+ data.username ) 
+            e.preventDefault();
+            post(route('register'), {
+                ...data,
+                username: username // add the username to the existing data
+            });
+        };
+        
     // Determine the color and icon for username status
     const getStatusStyles = () => {
         if (usernameStatus.loading) {
@@ -292,6 +321,9 @@ export default function Register() {
                                         <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">Confirm Password</label>
                                         <input id="password_confirmation" name="password_confirmation" type="password" value={data.password_confirmation} onChange={(e) => setData('password_confirmation', e.target.value)} required autoComplete="new-password" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"/>
                                         {errors.password_confirmation && <p className="mt-2 text-sm text-red-600">{errors.password_confirmation}</p>}
+                                    </div>
+                                    <div>
+                                        {errors.username && <p className="mt-2 text-sm text-red-600">{errors.username}</p>}
                                     </div>
                                     <div>
                                         <button type="submit" className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-base font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-all transform hover:scale-105" disabled={processing}>

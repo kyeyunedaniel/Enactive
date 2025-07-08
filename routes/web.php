@@ -98,6 +98,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
 Route::middleware(['auth', 'verified'])->prefix('user')->group(function () {
     Route::get('/',[UserController::class, 'show'] )->name('user.index');
 });

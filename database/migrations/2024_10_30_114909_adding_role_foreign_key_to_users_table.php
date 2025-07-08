@@ -13,11 +13,16 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->foreign('role_id') // Specify the column that is the foreign key
-            ->references('id') // The column in the referenced table (roles)
-            ->on('roles') // The table to reference
-            ->default(1)
-            ->onDelete('set null'); // Optional: set to null if the role is deleted
+             $table->unsignedBigInteger('role_id')
+                ->default(2) // Your default role ID
+                ->nullable()  // Only if using ON DELETE SET NULL
+                ->change();
+            
+            // 2. Add foreign key constraint
+            $table->foreign('role_id')
+                ->references('id')
+                ->on('roles')
+                ->onDelete('set null'); // or 'cascade' or 'restrict'
         });
     }
 
@@ -29,6 +34,12 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             //
             $table->dropForeign(['role_id']);
+            
+            // Optional: remove default if needed
+            $table->unsignedBigInteger('role_id')
+                ->nullable()
+                ->default(null)
+                ->change();
         });
     }
 };

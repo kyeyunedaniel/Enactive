@@ -13,6 +13,10 @@ use App\Http\Controllers\AllContentController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\FrontEndValidationController;
+//new controllers below 
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PublicPageController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +37,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
         'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
         ],
         'header'=>'Welcome'
     ]);
@@ -44,9 +48,13 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/home', function () {
-    return Inertia::render('DashboardScreens/HomeScreen'); //Pages/DashboardScreens/HomeScreen.jsx
-})->middleware(['auth', 'verified'])->name('dashboard.home');
+// Route::get('/home', function () {
+//     return Inertia::render('DashboardScreens/HomeScreen'); //Pages/DashboardScreens/HomeScreen.jsx
+// })->middleware(['auth', 'verified'])->name('dashboard.home');
+
+Route::get('/home', [HomeController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard.home');
 
 Route::get('/explore', function () {
     return Inertia::render('DashboardScreens/Explore'); //Pages/DashboardScreens/Explore.jsx
@@ -64,7 +72,7 @@ Route::get('/support', function () {
 Route::get('/settings', function () {
     return Inertia::render('DashboardScreens/Settings',[
         'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
         ]
     ]); //Pages/DashboardScreens/Support.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.settings');
@@ -72,7 +80,7 @@ Route::get('/settings', function () {
 Route::get('/payouts', function () {
     return Inertia::render('DashboardScreens/Payouts',[
         'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
         ]
     ]); //Pages/DashboardScreens/Support.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.payout');
@@ -80,7 +88,7 @@ Route::get('/payouts', function () {
 Route::get('/onboarding', function () {
     return Inertia::render('Onboarding',[
         'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
         ]
     ]); //Pages/Onboarding.jsx
 })->middleware(['auth', 'verified'])->name('onboarding.user');
@@ -89,7 +97,7 @@ Route::get('/onboarding', function () {
 Route::get('/buttons&graphics', function () {
     return Inertia::render('DashboardScreens/Supporters',[
         'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
         ]
     ]); //Pages/DashboardScreens/Support.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.support');
@@ -110,6 +118,32 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/wallets', [WalletController::class, 'index'])->middleware('admin');
+    Route::get('/wallets/{wallet}', [WalletController::class, 'show']);
+    Route::get('/users/{user}/wallet', [WalletController::class, 'byUser']);
+    Route::put('/wallets/{wallet}/approve', [WalletController::class, 'approve'])->middleware('admin');
+    Route::put('/wallets/{wallet}/toggle-lock', [WalletController::class, 'toggleLock'])->middleware('admin');
+    Route::put('/wallets/{wallet}/limits', [WalletController::class, 'updateLimits'])->middleware('admin');
+    Route::get('/wallets/{wallet}/balance', [WalletController::class, 'getBalance']);
+    Route::get('/wallets/{wallet}/withdrawal-limits', [WalletController::class, 'getWithdrawalLimits']);
+    Route::post('/wallets/{wallet}/check-withdrawal', [WalletController::class, 'checkWithdrawalAllowed']);
+});
+
+
+
+
+
+
+
+
+
+// here 
+
+Route::get('/dashboard/redirect', function () {
+    return response()->view('redirect-new-tab');
+})->name('dashboard.redirect');
 
 Route::prefix('shopping')->group(function () {
    Route::get('about', [ShoppingController::class, 'about'])->name('shopping.about'); 
@@ -163,6 +197,11 @@ Route::prefix('content-view')->group(function () {
 Route::prefix('cart')->group(function () {
     Route::get('/view_cart', [CartController::class, 'index'])->name('cart-view.index');
 });
+
+
+Route::get('/{slug}.app', [PublicPageController::class, 'index'])
+    ->where('slug', '[a-zA-Z0-9_-]+')
+    ->name('public.page');
 
 require __DIR__.'/auth.php';
 

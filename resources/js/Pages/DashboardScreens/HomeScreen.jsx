@@ -10,6 +10,7 @@ import {
     PencilSquareIcon,
     ArrowRightIcon
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 // --- Reusable Components for this page ---
 
@@ -41,12 +42,15 @@ const ActionCard = ({ title, description, buttonText, href, icon }) => (
 
 const formatCurrency = (amount) => new Intl.NumberFormat('en-US').format(amount);
 
-export default function HomeScreen({ auth }) {
+export default function HomeScreen({ auth, balance,currency }) {
     // These values would typically come from your controller/backend.
     // We'll set them here to match the design for a new user.
     const needsPayoutSetup = true; 
     const hasSupporters = false;
-    const totalEarnings = 100000000;
+    const totalEarnings = balance || 0.0;
+    const MyCurrency = currency || 'UGX'; 
+    console.log(auth)
+
 
     return (
         <AuthenticatedLayout
@@ -65,7 +69,7 @@ export default function HomeScreen({ auth }) {
                             Hi, {auth.user.name}!
                         </h1>
                         <p className="text-gray-500">
-                           creatorfuel.com/{auth.user.username}
+                           creatorfuel.com/{auth.user.public_url_name}.app
                         </p>
                     </div>
                 </div>
@@ -83,7 +87,7 @@ export default function HomeScreen({ auth }) {
                             <ChevronDownIcon className="w-4 h-4 ml-2 text-gray-500" />
                         </button>
                     </div>
-                    <p className="text-5xl font-extrabold text-gray-900">UGX {formatCurrency(totalEarnings)}</p>
+                    <p className="text-5xl font-extrabold text-gray-900">{MyCurrency} {formatCurrency(totalEarnings)}</p>
                     <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500">
                         <span className="flex items-center"><span className="w-2.5 h-2.5 bg-yellow-300 rounded-full mr-2"></span>UGX 0 Supporters</span>
                         <span className="flex items-center"><span className="w-2.5 h-2.5 bg-pink-300 rounded-full mr-2"></span>UGX 0 Membership</span>

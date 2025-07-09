@@ -88,6 +88,7 @@ const SidebarSectionTitle = ({ children }) => (
     </h3>
 );
 
+
 // --- Main Sidebar Content Component (to avoid duplication) ---
 const SidebarContent = ({ user }) => (
     <div className="flex flex-col h-full">
@@ -101,9 +102,12 @@ const SidebarContent = ({ user }) => (
             <SidebarNavLink href={route('dashboard.home')} active={route().current('dashboard.home')} icon={<HomeIcon className="w-5 h-5" />}>
                 Home
             </SidebarNavLink>
-            <SidebarNavLink href={`/${user.username}`} external icon={<EyeIcon className="w-5 h-5" />}>
-                View page
-            </SidebarNavLink>
+            
+            <a href={`${window.location.origin}/${user?.public_url_name}.app`} target="_blank" rel="noopener noreferrer" className="flex items-center w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                <EyeIcon className="w-5 h-5" />
+                <span className="ml-3">View page</span>
+                <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-auto text-gray-400" />
+            </a>
             <SidebarNavLink href={route('dashboard.explore')} active={route().current('dashboard.explore')} icon={<Squares2X2Icon className="w-5 h-5" />}>
                 Explore creators
             </SidebarNavLink>
@@ -144,7 +148,10 @@ const SidebarContent = ({ user }) => (
         </nav>
     </div>
 );
-
+const handleViewPage = (user2) => {
+    console.log((`${window.location.origin}/${user2?.public_url_name}`))
+  window.open(`${window.location.origin}/${user2?.public_url_name}.app`, '_blank');
+};
 
 export default function AuthenticatedLayout({ user, header, children, showPayoutsBanner = false }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);

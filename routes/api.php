@@ -4,6 +4,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FrontEndValidationController;
+use App\Http\Controllers\PesapalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/check_public_url_availability', [FrontEndValidationController::class, 'checkUsername'])->name('validate.checkUsername'); 
+
+Route::get('/pesapal-ipn/log-information', [FrontEndValidationController::class, 'checkUsername'])->name('validate.checkUsername'); 
+
+Route::post('/pesapal/initiate', [PesapalController::class, 'initiatePayment']);
+
+
+Route::post('/pesapal/check_transaction_status/', [PesapalController::class, 'checkStatus']);

@@ -16,6 +16,8 @@ use App\Http\Controllers\FrontEndValidationController;
 //new controllers below 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicPageController;
+use App\Http\Controllers\PesapalController; 
+use App\Http\Controllers\WalletTranactionController; 
 
 
 /*
@@ -132,14 +134,17 @@ Route::middleware('auth')->group(function () {
 });
 
 
+Route::prefix('payment')->group(function () {
+    Route::post('initiate-payment', [WalletTranactionController::class, 'makePayment'])->name('payment.make-payment');
+
+});
 
 
 
 
 
 
-
-// here 
+// here ############################### ############################ #############################
 
 Route::get('/dashboard/redirect', function () {
     return response()->view('redirect-new-tab');
@@ -197,6 +202,8 @@ Route::prefix('content-view')->group(function () {
 Route::prefix('cart')->group(function () {
     Route::get('/view_cart', [CartController::class, 'index'])->name('cart-view.index');
 });
+
+
 
 
 Route::get('/{slug}.app', [PublicPageController::class, 'index'])

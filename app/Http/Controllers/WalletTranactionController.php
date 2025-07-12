@@ -4,9 +4,97 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\models\WalletTranaction; 
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use DB; 
+use App\models\Wallet; 
 
 class WalletTranactionController extends Controller
 {
+
+    public function createTransaction(Request $request)
+{
+    try {
+    $validated = $request->validate([
+        'wallet_id' => 'required|integer|exists:Wallets,id',
+        'amount' => 'required|integer',
+        'phone_number' => 'required|string',
+        'name' => 'required|string',
+        'description_something_nice' => 'required|string',
+        'transaction_type' => ['sometimes', Rule::in(WalletTranaction::TRANSACTION_TYPES)],
+        'status' => ['sometimes', Rule::in(WalletTranaction::STATUSES)],
+    ]);
+    $current_balance = Wallet::where('id',$validated['wallet_id'])->first()->balance; 
+
+    DB::beginTransaction();
+
+    
+        $transaction = new WalletTranaction();
+
+
+        
+        // Frontend-provided fields (from validated request)
+        $transaction->wallet_id = $validated['wallet_id'];
+        $transaction->amount = $validated['amount'];
+        $transaction->description = "From {$validated['name']} ({$validated['phone_number']}): {$validated['description_something_nice']}";
+        
+        // Backend-generated fields
+        $transaction->transaction_type = $validated['transaction_type'] ?? 'donation_sent';
+        $transaction->status = $validated['status'] ?? 'pending';
+        $transaction->reference_id = 'txn_' . Str::uuid();
+        $transaction->reference_type = 'payment';
+        $transaction->transaction_hash = substr(hash('sha256', $transaction->wallet_id . microtime(true)), 0, 20);
+        $transaction->balance_after = $current_balance+$validated['amount']; 
+        $transaction->created_at = now();
+        
+        // Metadata (optional)
+        $transaction->metadata = [
+            'phone' => $validated['phone_number'],
+            'name' => $validated['name'],
+            'initiated_at' => now()->toDateTimeString()
+        ];
+        
+        if (!$transaction->save()) {
+            throw new \RuntimeException('Failed to save transaction');
+        }
+        
+        DB::commit();
+        
+        return response()->json([
+            'success' => true,
+            'transaction_id' => $transaction->id,
+            'transaction_hash/merchant_id' => $transaction->transaction_hash,
+            'data'=>$transaction
+        ]);
+        
+        //description => donation to $name of the person. 
+
+
+        // {
+        //     "amount": 10000,
+        //     "phone_number": "256772123456",
+        //     "unique_id_reference": "dep_123456789",
+        //     "description": "Test Wallet Deposit"
+        // }
+
+
+
+        //after saving -> use the information to make a call to the peapal endpoint, 
+
+        // return the link then render using the link 
+
+        // either use a modal on the frontend to deal with the response. 
+
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
     public function index(Request $request): JsonResponse
     {
         $request->validate([

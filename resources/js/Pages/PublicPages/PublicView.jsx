@@ -198,6 +198,7 @@ const DonationForm = ({ user, coffeePrice,currency }) => {
     const [message, setMessage] = useState('');
     const [isMonthly, setIsMonthly] = useState(false);
     const quantities = [1, 3, 5,];
+    const [phoneNumber, setPhoneNumber] = useState(''); 
 
     const handleQuantityChange = (e) => {
         const value = parseInt(e.target.value) || 1;
@@ -262,6 +263,13 @@ const DonationForm = ({ user, coffeePrice,currency }) => {
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 placeholder="Name or @yoursocial" 
+                className="w-full px-4 py-3 bg-gray-100 border-gray-200 rounded-lg focus:ring-[#10B981] focus:border-[#10B981]" 
+            />
+            <input 
+                type="text" 
+                value={phoneNumber} 
+                onChange={(e) => setPhoneNumber(e.target.value)} 
+                placeholder="Phone Number" 
                 className="w-full px-4 py-3 bg-gray-100 border-gray-200 rounded-lg focus:ring-[#10B981] focus:border-[#10B981]" 
             />
 

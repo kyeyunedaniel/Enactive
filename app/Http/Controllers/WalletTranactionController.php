@@ -1,0 +1,332 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\models\WalletTranaction; 
+
+class WalletTranactionController extends Controller
+{
+    public function index(Request $request): JsonResponse
+    {
+        $request->validate([
+            'wallet_id' => 'sometimes|exists:wallets,id',
+            'transaction_type' => ['sometimes', Rule::in(WalletTranaction::TRANSACTION_TYPES)],
+            'status' => ['sometimes', Rule::in(WalletTranaction::STATUSES)],
+            'per_page' => 'sometimes|integer|min:1|max:100',
+            'from_date' => 'sometimes|date',
+            'to_date' => 'sometimes|date|after_or_equal:from_date',
+        ]);
+
+        $query = WalletTranaction::with('wallet.user')
+            ->orderBy('created_at', 'desc');
+
+        // Apply filters
+        if ($request->has('wallet_id')) {
+            $query->forWallet($request->wallet_id);
+        }
+
+        if ($request->has('transaction_type')) {
+            $query->byType($request->transaction_type);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        $transactions = $query->paginate($request->get('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'data' => $transactions,
+        ]);
+    }
+
+    /**
+     * Show a specific payment transaction
+     */
+    public function show(WalletTranaction $WalletTranaction): JsonResponse
+    {
+        $WalletTranaction->load(['wallet.user', 'pesapalTransactions']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $WalletTranaction,
+        ]);
+    }
+
+    /**
+     * Create a new payment transaction (for donations)
+     */
+    public function createDonation(Request $request): JsonResponse
+    {
+        $request->validate([
+            'recipient_wallet_id' => 'required|exists:wallets,id',
+            'amount' => 'required|numeric|min:1|max:10000000',
+            'description' => 'sometimes|string|max:500',
+            'reference_id' => 'sometimes|string|max:255',
+            'reference_type' => 'sometimes|string|max:100',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $wallet = Wallet::findOrFail($request->recipient_wallet_id);
+
+            // Create pending donation transaction
+            $transaction = WalletTranaction::createPending([
+                'wallet_id' => $wallet->id,
+                'transaction_type' => 'donation_received',
+                'amount' => $request->amount,
+                'balance_after' => $wallet->balance, // Will be updated when payment completes
+                'description' => $request->description ?? "Donation received",
+                'reference_id' => $request->reference_id,
+                'reference_type' => $request->reference_type ?? 'donation',
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Donation transaction created successfully',
+                'data' => $transaction->load('wallet.user'),
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to create donation transaction: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create donation transaction',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Complete a payment transaction
+     */
+    public function complete(WalletTranaction $WalletTranaction): JsonResponse
+    {
+        if ($WalletTranaction->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction is not in pending status',
+            ], 400);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $wallet = $WalletTranaction->wallet;
+            $newBalance = $wallet->balance + $WalletTranaction->amount;
+
+            // Update wallet balance
+            $wallet->update(['balance' => $newBalance]);
+
+            // Mark transaction as completed
+            $WalletTranaction->markAsCompleted($newBalance);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction completed successfully',
+                'data' => $WalletTranaction->fresh(),
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to complete transaction: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to complete transaction',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Fail a payment transaction
+     */
+    public function fail(WalletTranaction $WalletTranaction, Request $request): JsonResponse
+    {
+        $request->validate([
+            'reason' => 'sometimes|string|max:500',
+        ]);
+
+        if ($WalletTranaction->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction is not in pending status',
+            ], 400);
+        }
+
+        try {
+            $WalletTranaction->markAsFailed($request->reason);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction marked as failed',
+                'data' => $WalletTranaction->fresh(),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to mark transaction as failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update transaction status',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel a payment transaction
+     */
+    public function cancel(WalletTranaction $WalletTranaction, Request $request): JsonResponse
+    {
+        $request->validate([
+            'reason' => 'sometimes|string|max:500',
+        ]);
+
+        if (!in_array($WalletTranaction->status, ['pending', 'failed'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaction cannot be cancelled',
+            ], 400);
+        }
+
+        try {
+            $WalletTranaction->markAsCancelled($request->reason);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaction cancelled successfully',
+                'data' => $WalletTranaction->fresh(),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to cancel transaction: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel transaction',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get transaction statistics
+     */
+    public function stats(Request $request): JsonResponse
+    {
+        $request->validate([
+            'wallet_id' => 'sometimes|exists:wallets,id',
+            'from_date' => 'sometimes|date',
+            'to_date' => 'sometimes|date|after_or_equal:from_date',
+        ]);
+
+        $query = WalletTranaction::query();
+
+        if ($request->has('wallet_id')) {
+            $query->forWallet($request->wallet_id);
+        }
+
+        if ($request->has('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->has('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        $stats = [
+            'total_transactions' => $query->count(),
+            'completed_transactions' => $query->clone()->completed()->count(),
+            'pending_transactions' => $query->clone()->pending()->count(),
+            'failed_transactions' => $query->clone()->failed()->count(),
+            'total_amount' => $query->clone()->completed()->sum('amount'),
+            'donations_received' => $query->clone()->completed()->byType('donation_received')->sum('amount'),
+            'donations_sent' => $query->clone()->completed()->byType('donation_sent')->sum('amount'),
+            'withdrawals' => $query->clone()->completed()->byType('withdrawal')->sum('amount'),
+            'deposits' => $query->clone()->completed()->byType('deposit')->sum('amount'),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats,
+        ]);
+    }
+
+    /**
+     * Add metadata to a transaction
+     */
+    public function addMetadata(WalletTranaction $WalletTranaction, Request $request): JsonResponse
+    {
+        $request->validate([
+            'metadata' => 'required|array',
+        ]);
+
+        try {
+            $WalletTranaction->addMetadata($request->metadata);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Metadata added successfully',
+                'data' => $WalletTranaction->fresh(),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to add metadata: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add metadata',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get transactions for a specific wallet
+     */
+    public function getWalletTransactions(Wallet $wallet, Request $request): JsonResponse
+    {
+        $request->validate([
+            'transaction_type' => ['sometimes', Rule::in(WalletTranaction::TRANSACTION_TYPES)],
+            'status' => ['sometimes', Rule::in(WalletTranaction::STATUSES)],
+            'per_page' => 'sometimes|integer|min:1|max:100',
+        ]);
+
+        $query = $wallet->WalletTranactions()
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('transaction_type')) {
+            $query->byType($request->transaction_type);
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $transactions = $query->paginate($request->get('per_page', 15));
+
+        return response()->json([
+            'success' => true,
+            'data' => $transactions,
+        ]);
+    }
+}

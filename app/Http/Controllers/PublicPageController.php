@@ -62,7 +62,7 @@ class PublicPageController extends Controller
         'theme_color' => $user->theme_color ?? '#10B981', // Default to emerald
         
         // Financial/Support
-        'wallet_id' => $user->id,
+        'wallet_id' => $user->wallet->id,
         'coffee_price' => $user->coffee_price ?? 1000, // Default £5
         'goal_amount' => $user->monthly_goal ?? null,
         'current_month_amount' => $user->current_month_earnings ?? 0,

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
+import axios from 'axios';
 import {
     GiftIcon,
     EllipsisHorizontalIcon,
@@ -20,6 +20,20 @@ const Card = ({ children, className = '' }) => (
         {children}
     </div>
 );
+
+const Loader = ({ className = '', size = 'md' }) => {
+    const sizes = {
+        sm: 'h-5 w-5',
+        md: 'h-8 w-8',
+        lg: 'h-12 w-12'
+    };
+    
+    return (
+        <div className={`flex justify-center items-center ${className}`}>
+            <div className={`animate-spin rounded-full border-t-2 border-b-2 border-[#10B981] ${sizes[size]}`}></div>
+        </div>
+    );
+};
 
 const YouTubeEmbed = ({ url }) => {
     const getVideoId = (url) => {
@@ -111,6 +125,14 @@ const ProgressBar = ({ current, goal }) => {
 
 // Payment Modal Component
 const PaymentModal = ({ isOpen, onClose, redirectUrl }) => {
+    const [iframeLoaded, setIframeLoaded] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setIframeLoaded(false);
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
@@ -126,12 +148,20 @@ const PaymentModal = ({ isOpen, onClose, redirectUrl }) => {
                         <XMarkIcon className="h-6 w-6" />
                     </button>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 relative">
+                    {!iframeLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center flex-col space-y-3">
+                            <Loader size="lg" />
+                            <p className="text-gray-600">Loading payment gateway...</p>
+                        </div>
+                    )}
                     <iframe 
                         src={redirectUrl}
                         className="w-full h-full border-0"
                         title="Payment Gateway"
                         sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                        onLoad={() => setIframeLoaded(true)}
+                        style={{ visibility: iframeLoaded ? 'visible' : 'hidden' }}
                     />
                 </div>
             </div>
@@ -317,7 +347,6 @@ const DonationForm = ({ user, coffeePrice, currency, onPaymentSuccess, onPayment
             [field]: value
         }));
         
-        // Clear error for this field when user starts typing
         if (errors[field]) {
             setErrors(prev => ({
                 ...prev,
@@ -329,48 +358,33 @@ const DonationForm = ({ user, coffeePrice, currency, onPaymentSuccess, onPayment
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Update amount based on current quantity
         const finalData = {
             ...formData,
             amount: quantity * coffeePrice,
         };
 
-        console.log("Submitting donation with data:", finalData);
-        
         setProcessing(true);
         setErrors({});
 
         try {
-            const response = await Inertia.post(route('making-donation'), finalData, {
-                onSuccess: (page) => {
-                    console.log("Payment success response:", page.props);
-                    
-                    if (page.props.success) {
-                        if (page.props.redirect_url) {
-                            console.log("Redirecting to payment gateway:", page.props.redirect_url);
-                            onPaymentSuccess(page.props.redirect_url);
-                        } else {
-                            console.error("Success but no redirect URL:", page.props);
-                            onPaymentError('Payment initialized but no redirect URL received');
-                        }
-                    } else {
-                        console.error("Payment service error:", page.props.message);
-                        onPaymentError(page.props.message || 'Payment service error');
-                    }
-                },
-                onError: (errors) => {
-                    console.error("Form validation errors:", errors);
-                    setErrors(errors);
-                    const errorMessage = Object.values(errors)[0] || 'Payment failed. Please try again.';
-                    onPaymentError(errorMessage);
-                },
-            });
-
-            console.log("Inertia response:", response);
+            const response = await axios.post(route('making-donation'), finalData);
+            
+            if (response.data.success) {
+                if (response.data.redirect_url) {
+                    onPaymentSuccess(response.data.redirect_url);
+                } else {
+                    onPaymentError('Payment initialized but no redirect URL received');
+                }
+            } else {
+                onPaymentError(response.data.message || 'Payment service error');
+            }
         } catch (error) {
-            console.error("An unexpected error occurred during payment:", error);
-            const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
-            onPaymentError(errorMessage);
+            if (error.response) {
+                setErrors(error.response.data.errors || {});
+                onPaymentError(error.response.data.message || 'Payment failed');
+            } else {
+                onPaymentError(error.message || 'Network error');
+            }
         } finally {
             setProcessing(false);
         }
@@ -498,12 +512,19 @@ const DonationForm = ({ user, coffeePrice, currency, onPaymentSuccess, onPayment
             <button 
                 type="submit" 
                 disabled={processing}
-                className={`w-full bg-[#10B981] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#059669] transition-all transform hover:scale-105 ${
-                    processing ? 'opacity-50 cursor-not-allowed' : ''
+                className={`w-full bg-[#10B981] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#059669] transition-all ${
+                    processing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
                 }`}
                 aria-busy={processing}
             >
-                {processing ? 'Processing...' : `Support ${currency || 'UGX'} ${(quantity * coffeePrice).toLocaleString()}`}
+                {processing ? (
+                    <div className="flex items-center justify-center">
+                        <Loader size="sm" className="mr-2" />
+                        Processing...
+                    </div>
+                ) : (
+                    `Support ${currency || 'UGX'} ${(quantity * coffeePrice).toLocaleString()}`
+                )}
             </button>
         </form>
     );
@@ -520,37 +541,24 @@ export default function PublicView({ user, recent_supporters, currency }) {
     const themeColor = user.theme_color || '#10B981';
 
     const handlePaymentSuccess = useCallback((redirectUrl) => {
-        console.log("Payment successful, redirecting to:", redirectUrl);
         setPaymentUrl(redirectUrl);
         setShowPaymentModal(true);
     }, []);
 
     const handlePaymentError = useCallback((error) => {
-        console.error("Payment error occurred:", error);
         setErrorMessage(error);
         setShowErrorModal(true);
     }, []);
 
     const closePaymentModal = useCallback(() => {
-        console.log("Closing payment modal");
         setShowPaymentModal(false);
         setPaymentUrl('');
     }, []);
 
     const closeErrorModal = useCallback(() => {
-        console.log("Closing error modal");
         setShowErrorModal(false);
         setErrorMessage('');
     }, []);
-
-    // Log initial props for debugging
-    useEffect(() => {
-        console.log("Component mounted with props:", {
-            user,
-            recent_supporters,
-            currency
-        });
-    }, [user, recent_supporters, currency]);
 
     return (
         <>
@@ -570,9 +578,6 @@ export default function PublicView({ user, recent_supporters, currency }) {
                                     SP
                                 </div>
                                 <h1 className="text-xl font-bold text-gray-800">{user.page_title}</h1>
-                            </div>
-                            <div className="flex items-center space-x-8">
-                                {/* Navigation links can be added here */}
                             </div>
                             <div className="flex items-center space-x-4">
                                <button 

@@ -22,7 +22,9 @@ class WalletTranactionController extends Controller
 
     public function createTransaction(Request $request)
 {
+
     try {
+
     $validated = $request->validate([
         'wallet_id' => 'required|integer|exists:Wallets,id',
         'amount' => 'required|integer',
@@ -32,6 +34,7 @@ class WalletTranactionController extends Controller
         'transaction_type' => ['sometimes', Rule::in(WalletTranaction::TRANSACTION_TYPES)],
         'status' => ['sometimes', Rule::in(WalletTranaction::STATUSES)],
     ]);
+
     $current_balance = Wallet::where('id',$validated['wallet_id'])->first()->balance; 
 
     DB::beginTransaction();
@@ -91,24 +94,31 @@ class WalletTranactionController extends Controller
         // dd($orderData); 
          $response = $this->pesapalService->submitOrder($orderData);
 
+        // if ($response['success']) {
+        //     return back()->with([
+        //         'success' => true,
+        //         'redirect_url' => $response['redirect_url'],
+        //         'order_tracking_id' => $response['order_tracking_id'],
+        //         'merchant_reference' => $response['merchant_reference']
+        //     ]);
+        // }
+        // else {
+        //     // Return back with error
+        //     return back()->with([
+        //         'success' => false,
+        //         'message' => $response['message'] ?? 'Payment service error'
+        //     ]);
+        // }
+
         if ($response['success']) {
-            // return response()->json([
-            //     'success' => true,
-            //     'redirect_url' => $response['redirect_url'],
-            //     'order_tracking_id' => $response['order_tracking_id'],
-            //     'merchant_reference' => $response['merchant_reference']
-            // ]);
-            // Return back to the same page with success data
-            return back()->with([
+            return response()->json([
                 'success' => true,
                 'redirect_url' => $response['redirect_url'],
                 'order_tracking_id' => $response['order_tracking_id'],
                 'merchant_reference' => $response['merchant_reference']
             ]);
-        }
-        else {
-            // Return back with error
-            return back()->with([
+        } else {
+            return response()->json([
                 'success' => false,
                 'message' => $response['message'] ?? 'Payment service error'
             ]);
@@ -117,11 +127,19 @@ class WalletTranactionController extends Controller
        
 
 
-    }  catch (\Exception $e) {
-        DB::rollBack();
-        dd($e); 
-        // Return back with error message
-        return back()->with([
+    }  
+    // catch (\Exception $e) {
+    //     DB::rollBack();
+    //     // dd($e); 
+    //     // Return back with error message
+    //     return back()->with([
+    //         'success' => false,
+    //         'message' => $e->getMessage()
+    //     ]);
+    // }
+
+    catch (\Exception $e) {
+        return response()->json([
             'success' => false,
             'message' => $e->getMessage()
         ]);

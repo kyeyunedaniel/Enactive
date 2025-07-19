@@ -18,20 +18,62 @@ export default function PaymentCallback({
 }) {
   const [localStatus, setLocalStatus] = useState(status);
   const [isLoading, setIsLoading] = useState(false);
+  const [checkCount, setCheckCount] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(5);
 
-  // Auto-refresh for pending status
+  // Auto-refresh for pending status with limited retries
   useEffect(() => {
-    if (localStatus === 'pending') {
-      const interval = setInterval(() => {
-        setIsLoading(true);
-        window.location.reload();
-      }, 5000); // Refresh every 5 seconds
+    if (localStatus === 'pending' && checkCount < 2) {
+      const countdownInterval = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            setIsLoading(true);
+            setCheckCount(prevCount => prevCount + 1);
+            
+            // Reload the page to check status
+            window.location.reload();
+            return 5; // Reset countdown
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-      return () => clearInterval(interval);
+      return () => clearInterval(countdownInterval);
+    } else if (localStatus === 'pending' && checkCount >= 2) {
+      // After 2 checks, mark as failed
+      setLocalStatus('failed');
     }
-  }, [localStatus]);
+  }, [localStatus, checkCount]);
+
+  // Update check count from localStorage on component mount
+  useEffect(() => {
+    const savedCheckCount = localStorage.getItem(`payment_check_${tracking_id}`);
+    if (savedCheckCount) {
+      const count = parseInt(savedCheckCount, 10);
+      setCheckCount(count);
+      
+      // If we've already checked 2 times and status is still pending, mark as failed
+      if (count >= 2 && status === 'pending') {
+        setLocalStatus('failed');
+      }
+    }
+  }, [tracking_id, status]);
+
+  // Save check count to localStorage whenever it changes
+  useEffect(() => {
+    if (tracking_id && checkCount > 0) {
+      localStorage.setItem(`payment_check_${tracking_id}`, checkCount.toString());
+    }
+  }, [checkCount, tracking_id]);
 
   const statusConfig = {
+    success: {
+      icon: <CheckBadgeIcon className="h-12 w-12 text-green-500" />,
+      title: 'Payment Successful',
+      message: 'Your payment has been processed successfully',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-600'
+    },
     completed: {
       icon: <CheckBadgeIcon className="h-12 w-12 text-green-500" />,
       title: 'Payment Successful',
@@ -47,11 +89,11 @@ export default function PaymentCallback({
       textColor: 'text-blue-600'
     },
     failed: {
-      icon: <ExclamationTriangleIcon className="h-12 w-12 text-yellow-500" />,
+      icon: <XMarkIcon className="h-12 w-12 text-red-500" />,
       title: 'Payment Failed',
-      message: 'Payment processing failed',
-      bgColor: 'bg-yellow-50',
-      textColor: 'text-yellow-600'
+      message: checkCount >= 2 ? 'Payment verification timed out' : 'Payment processing failed',
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-600'
     },
     error: {
       icon: <ExclamationTriangleIcon className="h-12 w-12 text-red-500" />,
@@ -63,6 +105,23 @@ export default function PaymentCallback({
   };
 
   const currentStatus = statusConfig[localStatus] || statusConfig.error;
+
+  const handleManualCheck = () => {
+    if (checkCount >= 2) {
+      return; // Don't allow more checks
+    }
+    
+    setIsLoading(true);
+    setCheckCount(prevCount => prevCount + 1);
+    window.location.reload();
+  };
+
+  // Clean up localStorage when payment is successful
+  useEffect(() => {
+    if ((localStatus === 'success' || localStatus === 'completed') && tracking_id) {
+      localStorage.removeItem(`payment_check_${tracking_id}`);
+    }
+  }, [localStatus, tracking_id]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -116,31 +175,53 @@ export default function PaymentCallback({
             </div>
           )}
 
-          {isLoading && localStatus === 'pending' && (
-            <p className="text-sm text-gray-500 text-center mt-4">
-              Checking status again...
-            </p>
+          {/* Status checking info */}
+          {localStatus === 'pending' && checkCount < 2 && (
+            <div className="text-center mt-4 p-3 bg-blue-50 rounded-lg">
+              {isLoading ? (
+                <p className="text-sm text-blue-600">
+                  Checking payment status...
+                </p>
+              ) : (
+                <div>
+                  <p className="text-sm text-blue-600">
+                    Automatically checking in {timeRemaining} seconds...
+                  </p>
+                  <p className="text-xs text-blue-500 mt-1">
+                    Check {checkCount + 1} of 2
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {localStatus === 'failed' && checkCount >= 2 && (
+            <div className="text-center mt-4 p-3 bg-red-50 rounded-lg">
+              <p className="text-sm text-red-600">
+                Payment verification failed after 2 attempts. Please contact support if you believe this is an error.
+              </p>
+            </div>
           )}
         </div>
 
         {/* Actions */}
         <div className="px-6 pb-6 flex flex-col space-y-3">
-          {localStatus === 'completed' ? (
+          {(localStatus === 'success' || localStatus === 'completed') ? (
             <Link
               href={route('dashboard')}
               className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md text-center"
             >
               Go to Dashboard
             </Link>
-          ) : (
+          ) : localStatus === 'pending' && checkCount < 2 ? (
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleManualCheck}
               className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
               disabled={isLoading}
             >
-              {isLoading ? 'Refreshing...' : 'Check Status Again'}
+              {isLoading ? 'Checking...' : 'Check Status Now'}
             </button>
-          )}
+          ) : null}
 
           {(localStatus === 'failed' || localStatus === 'error') && (
             <Link
@@ -150,6 +231,16 @@ export default function PaymentCallback({
               className="w-full py-2 px-4 border border-gray-300 hover:bg-gray-50 rounded-md text-center"
             >
               Contact Support
+            </Link>
+          )}
+
+          {/* Back to home link for all failed states */}
+          {(localStatus === 'failed' || localStatus === 'error') && (
+            <Link
+              href={route('dashboard')}
+              className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-md text-center"
+            >
+              Back to Dashboard
             </Link>
           )}
         </div>

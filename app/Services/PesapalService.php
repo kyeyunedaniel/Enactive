@@ -237,11 +237,14 @@ class PesapalService
         'orderTrackingId' => $orderTrackingId, 
     ]);
 
+    // dd($response->json()['payment_status_description']); 
     
     if ($response->successful()) {
+
+        // dd($response->json()); 
         return [
             'success' => true,
-            'status' => $response->json(), // COMPLETED, PENDING, etc.
+            'status' => $response->json()['payment_status_description'], // COMPLETED, PENDING, etc.
             'details' => $response->json()
         ];
     }
@@ -251,6 +254,7 @@ class PesapalService
         'message' => 'Status check failed',
         'response' => $response->body()
     ];
+
     }catch(\Exception){
         return response()->json([
             'status'=>0, 

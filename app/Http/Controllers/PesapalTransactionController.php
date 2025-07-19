@@ -234,7 +234,7 @@ protected function handleInertiaResponse($transaction, $statusResponse)
 
 
 
-    public function handleCallback(Request $request)
+    public function handleCallbackImp(Request $request)
 {
     try {
         // Validate callback parameters
@@ -249,45 +249,186 @@ protected function handleInertiaResponse($transaction, $statusResponse)
             'merchant_reference' => $validated['OrderMerchantReference']
         ])->first();
 
-
-        // dd($validated['OrderTrackingId']); 
-        // dd($validated['OrderMerchantReference']); 
-
-
-
-        if(!$transaction){
+        if (!$transaction) {
             return inertia('PublicPages/PaymentCallbackHandler', [
-        'status' => 'error',
-        'message' => 'transaction not found'
-        ]);
-            }
-        // Get current status
+                'status' => 'error',
+                'message' => 'Transaction not found'
+            ]);
+        }
+
+        // Get current status - use OrderTrackingId instead of merchant reference
         $statusResponse = $this->pesapalService->checkTransactionStatus(
-            $validated['OrderMerchantReference']
+            $validated['OrderTrackingId']  // Changed from OrderMerchantReference to OrderTrackingId
         );
 
-        // dd($statusResponse['status']['payment_status_description']);
+        // Check if the API call was successful
+        if (!$statusResponse['success']) {
+            return inertia('PublicPages/PaymentCallbackHandler', [
+                'status' => 'error',
+                'message' => $statusResponse['message'] ?? 'Failed to check payment status'
+            ]);
+        }
 
-        // Prepare simple response data
+        // Extract the actual status from the response details
+        $paymentDetails = $statusResponse['details'];
+        $paymentStatus = $paymentDetails['payment_status_description'] ?? 'Unknown';
+
+        // Update transaction status in database if needed
+        // $transaction->update([
+        //     'status' => $paymentStatus,
+        //     'confirmation_code' => $paymentDetails['confirmation_code'] ?? null,
+        //     'payment_method' => $paymentDetails['payment_method'] ?? null,
+        //     'updated_at' => now()
+        // ]);
+
+        // Prepare response data
         $data = [
-            'status' => strtolower($statusResponse['status']['payment_status_description']),
+            'status' => strtolower($paymentStatus), // Convert to lowercase for consistency
             'amount' => $transaction->amount,
             'currency' => $transaction->currency,
             'reference' => $transaction->merchant_reference,
             'tracking_id' => $transaction->order_tracking_id,
-            'timestamp' => now()->toDateTimeString()
+            'confirmation_code' => $paymentDetails['confirmation_code'] ?? null,
+            'payment_method' => $paymentDetails['payment_method'] ?? null,
+            'timestamp' => now()->toDateTimeString(),
+            'message' => $paymentDetails['message'] ?? 'Payment processed'
         ];
 
-        return inertia('PublicPages/PaymentCallbackHandler', $data);  
+        return inertia('PublicPages/PaymentCallbackHandler', $data);
 
     } catch (\Exception $e) {
         return inertia('PublicPages/PaymentCallbackHandler', [
             'status' => 'error',
-            'message' => $e->getMessage()
+            'message' => 'An error occurred: ' . $e->getMessage()
         ]);
     }
 }
 
+
+public function handleCallback(Request $request)
+{
+    try {
+        // Validate callback parameters
+        $validated = $request->validate([
+            'OrderTrackingId' => 'required|string',
+            'OrderMerchantReference' => 'required|string'
+        ]);
+
+        // Find transaction
+        $transaction = PesapalTransaction::where([
+            'order_tracking_id' => $validated['OrderTrackingId'],
+            'merchant_reference' => $validated['OrderMerchantReference']
+        ])->first();
+
+        if (!$transaction) {
+            return inertia('PublicPages/PaymentCallbackHandler', [
+                'status' => 'error',
+                'message' => 'Transaction not found'
+            ]);
+        }
+
+        // Get current status - use OrderTrackingId instead of merchant reference
+        $statusResponse = $this->pesapalService->checkTransactionStatus(
+            $validated['OrderTrackingId']  // Changed from OrderMerchantReference to OrderTrackingId
+        );
+
+        // Check if the API call was successful
+        if (!$statusResponse['success']) {
+            return inertia('PublicPages/PaymentCallbackHandler', [
+                'status' => 'error',
+                'message' => $statusResponse['message'] ?? 'Failed to check payment status'
+            ]);
+        }
+
+        // Extract the actual status from the response
+        $paymentDetails = $statusResponse['details'];
+        $paymentStatus = $statusResponse['status']; // Use the processed status from service
+
+        // Map status for database storage
+        $dbStatus = $this->mapPaymentStatusForDatabase($paymentStatus);
+        
+        // Update transaction status in database
+        $transaction->update([
+            'status' => $dbStatus,
+            'confirmation_code' => $paymentDetails['confirmation_code'] ?? null,
+            'payment_method' => $paymentDetails['payment_method'] ?? null,
+            'updated_at' => now()
+        ]);
+
+        // Prepare response data with appropriate status for frontend
+        $data = [
+            'status' => strtolower($this->mapPaymentStatusForFrontend($paymentStatus)),
+            'amount' => $transaction->amount,
+            'currency' => $transaction->currency,
+            'reference' => $transaction->merchant_reference,
+            'tracking_id' => $transaction->order_tracking_id,
+            'confirmation_code' => $paymentDetails['confirmation_code'] ?? null,
+            'payment_method' => $paymentDetails['payment_method'] ?? null,
+            'timestamp' => now()->toDateTimeString(),
+            'message' => $this->getStatusMessage($paymentStatus),
+            'raw_status' => $paymentStatus // Include original status for debugging
+        ];
+
+        return inertia('PublicPages/PaymentCallbackHandler', $data);
+
+    } catch (\Exception $e) {
+        return inertia('PublicPages/PaymentCallbackHandler', [
+            'status' => 'error',
+            'message' => 'An error occurred: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Map payment status for database storage
+ */
+private function mapPaymentStatusForDatabase($status)
+{
+    $statusMap = [
+        'Completed' => 'completed',
+        'Pending' => 'pending',
+        'Pending Payment' => 'pending',
+        'INVALID' => 'pending',
+        'Failed' => 'failed',
+        'Cancelled' => 'cancelled'
+    ];
+
+    return $statusMap[$status] ?? 'unknown';
+}
+
+/**
+ * Map payment status for frontend display
+ */
+private function mapPaymentStatusForFrontend($status)
+{
+    $statusMap = [
+        'Completed' => 'success',
+        'Pending' => 'pending',
+        'Pending Payment' => 'pending',
+        'INVALID' => 'pending',
+        'Failed' => 'failed',
+        'Cancelled' => 'cancelled'
+    ];
+
+    return $statusMap[$status] ?? 'unknown';
+}
+
+/**
+ * Get user-friendly status message
+ */
+private function getStatusMessage($status)
+{
+    $messages = [
+        'Completed' => 'Payment completed successfully',
+        'Pending' => 'Payment is still pending',
+        'Pending Payment' => 'Payment is still pending',
+        'INVALID' => 'Payment is still being processed',
+        'Failed' => 'Payment failed',
+        'Cancelled' => 'Payment was cancelled'
+    ];
+
+    return $messages[$status] ?? 'Payment status unknown';
+}
 
     //
     /**

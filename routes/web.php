@@ -136,8 +136,11 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('payment')->group(function () {
     Route::post('initiate-payment', [WalletTranactionController::class, 'makePayment'])->name('payment.make-payment');
+    Route::post('/final/payment', [WalletTranactionController::class,'createTransaction'])->name('making-donation'); 
 
 });
+
+
 
 
 

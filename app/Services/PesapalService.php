@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\PesapalTransaction; 
+use Illuminate\Support\Facades\DB;
 
 class PesapalService
 {
@@ -57,7 +59,7 @@ class PesapalService
     /**
      * Submit payment order to Pesapal
      */
-    public function submitOrder(array $orderData)
+    public function submitOrder1(array $orderData)
     {
         $token = $this->getAuthToken();
         if (!$token) {
@@ -125,6 +127,97 @@ class PesapalService
             ];
         }
     }
+
+
+
+
+    // imporved function with saving . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    public function submitOrder(array $orderData)
+{
+    $token = $this->getAuthToken();
+    if (!$token) {
+        return [
+            'success' => false,
+            'message' => 'Failed to authenticate with Pesapal'
+        ];
+    }
+
+    try {
+        $payload = [
+            'id' => $orderData['unique_id_reference'],
+            'currency' => 'UGX',
+            'amount' => $orderData['amount'],
+            'description' => $orderData['description'] ?? 'Wallet Deposit',
+            'callback_url' => $this->callbackUrl,
+            'notification_id' => $this->ipnId,
+            'billing_address' => [
+                'email_address' => $orderData['email'] ?? '',
+                'phone_number' => $orderData['phone_number'],
+                'country_code' => 'UG',
+            ]
+        ];
+
+        $response = Http::withHeaders([
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
+        ])->post($this->baseUrl . '/api/Transactions/SubmitOrderRequest', $payload);
+
+        if ($response->successful()) {
+            $data = $response->json();
+            
+            // Use database transaction to ensure data consistency
+            return DB::transaction(function () use ($data, $payload, $orderData) {
+                // Save to pesapal_transactions table
+                PesapalTransaction::create([
+                    'wallet_transaction_id' => $orderData['wallet_transaction_id_saved'],  //needs to be sent using the order data now
+                    'merchant_reference' => $data['merchant_reference'],
+                    'order_tracking_id' => $data['order_tracking_id'],
+                    'amount' => $orderData['amount'],
+                    'currency' => 'UGX',
+                    'description' => $orderData['description'] ?? 'Wallet Deposit',
+                    'payment_status' => 'PENDING', // Initial status
+                    'redirect_url' => $data['redirect_url'],
+                    'notification_id' => $this->ipnId,
+                    'submit_order_request' => $payload,
+                    'submit_order_response' => $data,
+                    'submitted_at' => now(),
+                ]);
+
+                Log::info('Pesapal Order Submitted and Saved', [
+                    'merchant_reference' => $data['merchant_reference'],
+                    'order_tracking_id' => $data['order_tracking_id'],
+                    'redirect_url' => $data['redirect_url']
+                ]);
+
+                return [
+                    'success' => true,
+                    'order_tracking_id' => $data['order_tracking_id'],
+                    'merchant_reference' => $data['merchant_reference'],
+                    'redirect_url' => $data['redirect_url']
+                ];
+            });
+        }
+
+        Log::error('Pesapal Order Submission Failed', [
+            'status' => $response->status(),
+            'response' => $response->body()
+        ]);
+        
+        return [
+            'success' => false,
+            'message' => 'Failed to submit order to Pesapal',
+            'response' => $response->body()
+        ];
+
+    } catch (\Exception $e) {
+        Log::error('Pesapal Order Exception', ['error' => $e->getMessage()]);
+        return [
+            'success' => false,
+            'message' => 'Exception occurred while submitting order'
+        ];
+    }
+}
 
 
     public function checkTransactionStatus($orderTrackingId)

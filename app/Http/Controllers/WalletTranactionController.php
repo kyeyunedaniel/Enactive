@@ -8,9 +8,17 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use DB; 
 use App\models\Wallet; 
+use App\Services\PesapalService;
 
 class WalletTranactionController extends Controller
 {
+
+    protected $PesapalService; 
+
+    public function __construct(PesapalService $pesapalService)
+    {
+        $this->pesapalService = $pesapalService;
+    }
 
     public function createTransaction(Request $request)
 {
@@ -59,39 +67,64 @@ class WalletTranactionController extends Controller
         }
         
         DB::commit();
+
+         // return response()->json([
+        //     'success' => true,
+        //     'transaction_id' => $transaction->id,
+        //     'transaction_hash/merchant_id' => $transaction->transaction_hash,
+        //     'data'=>$transaction
+        // ]);
+
+
+        $orderData = [
+            'amount' => $transaction->amount,
+            'phone_number' => $transaction->metadata['phone'],
+            'unique_id_reference' => $transaction->transaction_hash,
+            'description' => 'Luseke Wallet Donation',
+            'email' => $transaction->email ?? null,
+            'first_name' => $transaction->metadata['name'] ?? 'Donator',
+            'wallet_transaction_id_saved'=>$transaction->id
+        ];
+
+        // NB: THE "UNIQUE_ID_REFERENCE" WE SEND, IS SENT BACK AS THE "MERCHANT_ID" AND THEY ATTACH A NEW "ORDER_TRACKING_ID" FROM THEIR SIDE .  
         
-        return response()->json([
-            'success' => true,
-            'transaction_id' => $transaction->id,
-            'transaction_hash/merchant_id' => $transaction->transaction_hash,
-            'data'=>$transaction
-        ]);
-        
-        //description => donation to $name of the person. 
+        // dd($orderData); 
+         $response = $this->pesapalService->submitOrder($orderData);
+
+        if ($response['success']) {
+            // return response()->json([
+            //     'success' => true,
+            //     'redirect_url' => $response['redirect_url'],
+            //     'order_tracking_id' => $response['order_tracking_id'],
+            //     'merchant_reference' => $response['merchant_reference']
+            // ]);
+            // Return back to the same page with success data
+            return back()->with([
+                'success' => true,
+                'redirect_url' => $response['redirect_url'],
+                'order_tracking_id' => $response['order_tracking_id'],
+                'merchant_reference' => $response['merchant_reference']
+            ]);
+        }
+        else {
+            // Return back with error
+            return back()->with([
+                'success' => false,
+                'message' => $response['message'] ?? 'Payment service error'
+            ]);
+        }
+
+       
 
 
-        // {
-        //     "amount": 10000,
-        //     "phone_number": "256772123456",
-        //     "unique_id_reference": "dep_123456789",
-        //     "description": "Test Wallet Deposit"
-        // }
-
-
-
-        //after saving -> use the information to make a call to the peapal endpoint, 
-
-        // return the link then render using the link 
-
-        // either use a modal on the frontend to deal with the response. 
-
-
-    } catch (\Exception $e) {
+    }  catch (\Exception $e) {
         DB::rollBack();
-        return response()->json([
+        dd($e); 
+        // Return back with error message
+        return back()->with([
             'success' => false,
             'message' => $e->getMessage()
-        ], 500);
+        ]);
     }
 }
 

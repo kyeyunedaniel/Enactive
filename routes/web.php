@@ -18,6 +18,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\PesapalController; 
 use App\Http\Controllers\WalletTranactionController; 
+use App\Http\Controllers\PesapalTransactionController;
 
 
 /*
@@ -137,7 +138,8 @@ Route::middleware('auth')->group(function () {
 Route::prefix('payment')->group(function () {
     Route::post('initiate-payment', [WalletTranactionController::class, 'makePayment'])->name('payment.make-payment');
     Route::post('/final/payment', [WalletTranactionController::class,'createTransaction'])->name('making-donation'); 
-
+    Route::get('response-page', [PesapalTransactionController::class, 'handleCallback'])->name('pesapal.callback');
+    Route::match(['get', 'post'], 'payment/callback', [PesapalTransactionController::class, 'handleCallback'])->name('payment.callback');
 });
 
 

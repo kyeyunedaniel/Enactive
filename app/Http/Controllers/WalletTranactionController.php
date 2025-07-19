@@ -9,6 +9,7 @@ use Illuminate\Validation\Rule;
 use DB; 
 use App\models\Wallet; 
 use App\Services\PesapalService;
+use App\Models\PesapalTransaction;
 
 class WalletTranactionController extends Controller
 {
@@ -71,14 +72,6 @@ class WalletTranactionController extends Controller
         
         DB::commit();
 
-         // return response()->json([
-        //     'success' => true,
-        //     'transaction_id' => $transaction->id,
-        //     'transaction_hash/merchant_id' => $transaction->transaction_hash,
-        //     'data'=>$transaction
-        // ]);
-
-
         $orderData = [
             'amount' => $transaction->amount,
             'phone_number' => $transaction->metadata['phone'],
@@ -91,24 +84,7 @@ class WalletTranactionController extends Controller
 
         // NB: THE "UNIQUE_ID_REFERENCE" WE SEND, IS SENT BACK AS THE "MERCHANT_ID" AND THEY ATTACH A NEW "ORDER_TRACKING_ID" FROM THEIR SIDE .  
         
-        // dd($orderData); 
          $response = $this->pesapalService->submitOrder($orderData);
-
-        // if ($response['success']) {
-        //     return back()->with([
-        //         'success' => true,
-        //         'redirect_url' => $response['redirect_url'],
-        //         'order_tracking_id' => $response['order_tracking_id'],
-        //         'merchant_reference' => $response['merchant_reference']
-        //     ]);
-        // }
-        // else {
-        //     // Return back with error
-        //     return back()->with([
-        //         'success' => false,
-        //         'message' => $response['message'] ?? 'Payment service error'
-        //     ]);
-        // }
 
         if ($response['success']) {
             return response()->json([
@@ -128,16 +104,6 @@ class WalletTranactionController extends Controller
 
 
     }  
-    // catch (\Exception $e) {
-    //     DB::rollBack();
-    //     // dd($e); 
-    //     // Return back with error message
-    //     return back()->with([
-    //         'success' => false,
-    //         'message' => $e->getMessage()
-    //     ]);
-    // }
-
     catch (\Exception $e) {
         return response()->json([
             'success' => false,

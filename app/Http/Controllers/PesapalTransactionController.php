@@ -9,9 +9,286 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\PesapalTransaction;
 use App\Models\WalletTranaction;
+use App\models\Wallet; 
+use App\Services\PesapalService;
+use Inertia\Inertia;
 
 class PesapalTransactionController extends Controller
 {
+
+    protected $PesapalService; 
+
+    public function __construct(PesapalService $pesapalService)
+    {
+        $this->pesapalService = $pesapalService;
+    }
+
+
+    /**
+     * Handle Pesapal callback (GET and POST)
+     */
+    public function handleCallback11(Request $request)
+    {
+        Log::info('Pesapal Callback Received:', [
+            'method' => $request->method(),
+            'data' => $request->all()
+        ]);
+
+        try {
+            // Validate required parameters
+            $validated = $this->validateCallback($request);
+            $orderTrackingId = $validated['OrderTrackingId'];
+
+            // Find the transaction in PesapalTransactions table
+            $pesapalTransaction = PesapalTransaction::where('order_tracking_id', $orderTrackingId)->first();
+
+            if (!$pesapalTransaction) {
+                Log::error('Pesapal transaction not found', ['order_tracking_id' => $orderTrackingId]);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Transaction not found'
+                ], 404);
+            }
+
+            // Check payment status using the merchant reference
+            $statusResponse = $this->checkPaymentStatus($pesapalTransaction->merchant_reference);
+
+            // Update transaction record
+            $this->updateTransaction($pesapalTransaction, $statusResponse);
+
+            return $this->buildResponse($pesapalTransaction, $statusResponse);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error in callback', ['errors' => $e->errors()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid request parameters',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Callback processing error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while processing your payment'
+            ], 500);
+        }
+    }
+
+    public function handleCallback22(Request $request)
+{
+    Log::info('Pesapal Callback Received:', [
+        'method' => $request->method(),
+        'data' => $request->all()
+    ]);
+
+    try {
+        // Validate required parameters
+        $validated = $request->validate([
+            'OrderTrackingId' => 'required|string',
+            'OrderMerchantReference' => 'required|string',
+            'OrderNotificationType' => 'nullable|string|in:CALLBACKURL'
+        ]);
+
+        // Find the transaction
+        $transaction = PesapalTransaction::where([
+            'order_tracking_id' => $validated['OrderTrackingId'],
+            'merchant_reference' => $validated['OrderMerchantReference']
+        ])->firstOrFail();
+
+        // Check payment status
+        $statusResponse = $this->pesapalService->checkTransactionStatus(
+            $validated['OrderMerchantReference']
+        );
+
+        // Update transaction
+        $transaction->update([
+            'payment_status' => $statusResponse['payment_status_description'],
+            'last_status_check_at' => now(),
+            'status_check_responses' => array_merge(
+                (array)$transaction->status_check_responses,
+                [$statusResponse]
+            )
+        ]);
+
+        // Redirect to appropriate Inertia page
+        return $this->handleInertiaResponse($transaction, $statusResponse);
+
+    } catch (ModelNotFoundException $e) {
+        return inertia('Payments/CallbackError', [
+            'error' => 'Transaction not found',
+            'reference' => $request->input('OrderMerchantReference')
+        ]);
+    } catch (\Exception $e) {
+        return inertia('Payments/CallbackError', [
+            'error' => 'Payment processing error',
+            'message' => $e->getMessage(),
+            'reference' => $request->input('OrderMerchantReference')
+        ]);
+    }
+}
+
+protected function handleInertiaResponse($transaction, $statusResponse)
+{
+    $data = [
+        'transaction' => [
+            'id' => $transaction->id,
+            'amount' => $transaction->amount,
+            'currency' => $transaction->currency,
+            'reference' => $transaction->merchant_reference,
+            'tracking_id' => $transaction->order_tracking_id,
+            'status' => $statusResponse['payment_status_description'],
+            'timestamp' => now()->toDateTimeString()
+        ]
+    ];
+
+    if ($statusResponse['payment_status_description'] === 'COMPLETED') {
+        return inertia('Payments/Success', $data);
+    }
+
+    return inertia('Payments/Pending', array_merge($data, [
+        'check_interval' => 5000 // milliseconds for frontend polling
+    ]));
+}
+
+    /**
+     * Validate callback request
+     */
+    protected function validateCallback(Request $request)
+    {
+        return $request->validate([
+            'OrderTrackingId' => 'required|string',
+            'OrderMerchantReference' => 'nullable|string',
+            'OrderNotificationType' => 'nullable|string',
+        ]);
+    }
+
+    /**
+     * Check payment status with Pesapal API
+     */
+    protected function checkPaymentStatus($merchantReference)
+    {
+        $result = $this->pesapalService->checkTransactionStatus($merchantReference);
+
+        if (!$result['success']) {
+            throw new \Exception("Failed to verify payment status: " . $result['message']);
+        }
+
+        return $result['details'];
+    }
+
+    /**
+     * Update transaction record
+     */
+    protected function updateTransaction(PesapalTransaction $transaction, array $statusResponse)
+    {
+        $updateData = [
+            'payment_status' => $statusResponse['payment_status_description'],
+            'payment_method' => $statusResponse['payment_method'] ?? null,
+            'payment_account' => $statusResponse['payment_account'] ?? null,
+            'last_status_check_at' => now(),
+            'status_check_responses' => array_merge(
+                (array)$transaction->status_check_responses,
+                [$statusResponse]
+            )
+        ];
+
+        if ($statusResponse['payment_status_description'] === 'COMPLETED') {
+            $updateData['payment_completed_at'] = now();
+        }
+
+        $transaction->update($updateData);
+    }
+
+    /**
+     * Build appropriate response
+     */
+    protected function buildResponse(PesapalTransaction $transaction, array $statusResponse)
+    {
+        $baseResponse = [
+            'transaction_id' => $transaction->id,
+            'merchant_reference' => $transaction->merchant_reference,
+            'order_tracking_id' => $transaction->order_tracking_id,
+            'amount' => $transaction->amount,
+            'currency' => $transaction->currency
+        ];
+
+        if ($statusResponse['payment_status_description'] === 'COMPLETED') {
+            return response()->json(array_merge($baseResponse, [
+                'status' => 'success',
+                'message' => 'Payment completed successfully',
+                'confirmation_code' => $statusResponse['confirmation_code'] ?? null,
+                'completed_at' => now()->toDateTimeString()
+            ]));
+        }
+
+        return response()->json(array_merge($baseResponse, [
+            'status' => strtolower($statusResponse['payment_status_description']),
+            'message' => 'Payment is being processed',
+            'current_status' => $statusResponse['payment_status_description']
+        ]));
+    }
+
+
+
+
+    public function handleCallback(Request $request)
+{
+    try {
+        // Validate callback parameters
+        $validated = $request->validate([
+            'OrderTrackingId' => 'required|string',
+            'OrderMerchantReference' => 'required|string'
+        ]);
+
+        // Find transaction
+        $transaction = PesapalTransaction::where([
+            'order_tracking_id' => $validated['OrderTrackingId'],
+            'merchant_reference' => $validated['OrderMerchantReference']
+        ])->first();
+
+
+        // dd($validated['OrderTrackingId']); 
+        // dd($validated['OrderMerchantReference']); 
+
+
+
+        if(!$transaction){
+            return inertia('PublicPages/PaymentCallbackHandler', [
+        'status' => 'error',
+        'message' => 'transaction not found'
+        ]);
+            }
+        // Get current status
+        $statusResponse = $this->pesapalService->checkTransactionStatus(
+            $validated['OrderMerchantReference']
+        );
+
+        // dd($statusResponse['status']['payment_status_description']);
+
+        // Prepare simple response data
+        $data = [
+            'status' => strtolower($statusResponse['status']['payment_status_description']),
+            'amount' => $transaction->amount,
+            'currency' => $transaction->currency,
+            'reference' => $transaction->merchant_reference,
+            'tracking_id' => $transaction->order_tracking_id,
+            'timestamp' => now()->toDateTimeString()
+        ];
+
+        return inertia('PublicPages/PaymentCallbackHandler', $data);  
+
+    } catch (\Exception $e) {
+        return inertia('PublicPages/PaymentCallbackHandler', [
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+}
+
+
     //
     /**
      * Display a listing of Pesapal transactions

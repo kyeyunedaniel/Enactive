@@ -80,13 +80,15 @@ Route::get('/settings', function () {
     ]); //Pages/DashboardScreens/Support.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.settings');
 
-Route::get('/payouts', function () {
-    return Inertia::render('DashboardScreens/Payouts',[
-        'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
-        ]
-    ]); //Pages/DashboardScreens/Support.jsx
-})->middleware(['auth', 'verified'])->name('dashboard.payout');
+// Route::get('/payouts', function () {
+//     return Inertia::render('DashboardScreens/Payouts',[
+//         'auth' => [
+//             'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
+//         ]
+//     ]); //Pages/DashboardScreens/Support.jsx
+// })->middleware(['auth', 'verified'])->name('dashboard.payout');
+
+Route::get('/payouts',[HomeController::class,'MainDashboardPage'])->middleware(['auth', 'verified'])->name('dashboard.payout');
 
 Route::get('/onboarding', function () {
     return Inertia::render('Onboarding',[

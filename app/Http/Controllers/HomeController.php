@@ -69,6 +69,33 @@ class HomeController extends Controller
         
         return $wallet;
     }
+
+
+
+    public function MainDashboardPage(){
+         $user = Auth::user();
+
+        $wallet = $this->ensureUserWallet($user);
+        
+        return Inertia::render('DashboardScreens/Payouts', [
+            // 'auth'=>$user,
+            'auth' => [
+            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name','phone_number') : null
+            ],
+            'availableBalance' => $wallet->balance,
+            'currency' => $wallet->currency,
+            'walletStatus' => [
+                'approved' => $wallet->approved,
+                'is_locked' => $wallet->is_locked,
+            ],
+            'withdrawalLimits' => [
+                'daily' => $wallet->daily_withdrawal_limit,
+                'monthly' => $wallet->monthly_withdrawal_limit,
+                'used_today' => $wallet->withdrawn_today,
+                'used_this_month' => $wallet->withdrawn_this_month,
+            ]
+        ]);
+    } 
     
 
 }

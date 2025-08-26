@@ -94,7 +94,7 @@ export default function PayoutsScreen({ auth, availableBalance, payoutMethod, pa
     };
 
     availableBalance = availableBalance ?? MOCK_DATA.availableBalance;
-    payoutMethod = payoutMethod ?? MOCK_DATA.payoutMethod;
+    payoutMethod = auth?.phone_number ?? MOCK_DATA.payoutMethod;
     payoutHistory = payoutHistory ?? MOCK_DATA.payoutHistory;
 
     const [isEditingMethod, setIsEditingMethod] = useState(!payoutMethod);

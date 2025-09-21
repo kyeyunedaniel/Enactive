@@ -360,7 +360,7 @@ const DonationForm = ({ user, coffeePrice, currency, onPaymentSuccess, onPayment
         
         const finalData = {
             ...formData,
-            amount: quantity * coffeePrice,
+            amount: 500 //quantity * coffeePrice,
         };
 
         setProcessing(true);

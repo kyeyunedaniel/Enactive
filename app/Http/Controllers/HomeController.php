@@ -94,6 +94,7 @@ class HomeController extends Controller
                 'used_today' => $wallet->withdrawn_today,
                 'used_this_month' => $wallet->withdrawn_this_month,
             ]
+            // missing payment history 
         ]);
     } 
     

@@ -1,7 +1,7 @@
 // GlobalHeading.jsx
 import React, { useContext } from 'react';
 import NavLink from '@/Components/NavLink';
-import { CartContext } from '../context/cartContext';  // Import CartContext
+import { CartContext } from '../context/CartContext';  // Import CartContext
 import { FaShoppingCart } from 'react-icons/fa';  // Example cart icon from react-icons
 
 const GlobalHeading = () => {

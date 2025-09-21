@@ -1,14 +1,14 @@
 // GlobalHeading.jsx
 import React, { useContext } from 'react';
 import NavLink from '@/Components/NavLink';
-import { CartContext } from '../context/CartContext';  // Import CartContext
+import { CartContext } from '../context/cartContext';  // Import CartContext
 import { FaShoppingCart } from 'react-icons/fa';  // Example cart icon from react-icons
 
 const GlobalHeading = () => {
-    const { cart } = useContext(CartContext);  // Access the cart from context
+    // const { cart } = useContext(CartContext);  // Access the cart from context
 
     // Calculate total quantity in cart
-    const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+    // const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
     return (
         <header className="bg-white py-4 shadow-sm mb-4">

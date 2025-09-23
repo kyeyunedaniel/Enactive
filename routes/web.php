@@ -19,6 +19,7 @@ use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\PesapalController; 
 use App\Http\Controllers\WalletTranactionController; 
 use App\Http\Controllers\PesapalTransactionController;
+use App\Http\Controllers\SupportersController; 
 
 
 /*
@@ -99,15 +100,15 @@ Route::get('/onboarding', function () {
 })->middleware(['auth', 'verified'])->name('onboarding.user');
 
 
-Route::get('/supporters', function () {
-    return Inertia::render('DashboardScreens/Supporters',[
-        'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
-        ]
-    ]); //Pages/DashboardScreens/Support.jsx
-})->middleware(['auth', 'verified'])->name('dashboard.support');
+// Route::get('/supporters', function () {
+//     return Inertia::render('DashboardScreens/Supporters',[
+//         'auth' => [
+//             'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
+//         ]
+//     ]); //Pages/DashboardScreens/Support.jsx
+// })->middleware(['auth', 'verified'])->name('dashboard.support');
 
-
+Route::get('/supporters',[SupportersController::class,'index'])->middleware(['auth', 'verified'])->name('dashboard.support');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

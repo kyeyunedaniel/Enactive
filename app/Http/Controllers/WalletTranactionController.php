@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\models\WalletTranaction; 
+use App\Models\WalletTranaction; 
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use DB; 
-use App\models\Wallet; 
+use App\Models\Wallet; 
 use App\Services\PesapalService;
 use App\Models\PesapalTransaction;
 

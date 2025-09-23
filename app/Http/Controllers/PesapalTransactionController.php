@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\PesapalTransaction;
 use App\Models\WalletTranaction;
-use App\models\Wallet; 
+use App\Models\Wallet; 
 use App\Services\PesapalService;
 use Inertia\Inertia;
 

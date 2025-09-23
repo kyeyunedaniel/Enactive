@@ -126,7 +126,7 @@ const QuickActionButton = ({ icon, label, description, onClick, variant = 'prima
 
 // Support Link Card Component
 const SupportLinkCard = ({ publicUrlName }) => {
-    const supportUrl = `${window.location.origin}/support/${publicUrlName}`;
+    const supportUrl = `${window.location.origin}/${publicUrlName}.app`;
     
     const copyToClipboard = () => {
         navigator.clipboard.writeText(supportUrl);
@@ -222,7 +222,7 @@ export default function Supporters({ auth, stats, transactions, wallet }) {
             </div> */}
 
             {/* Support Link Card */}
-            <SupportLinkCard publicUrlName={auth.user.public_url_name} />
+            <SupportLinkCard publicUrlName={auth?.user?.public_url_name} />
 
             {/* Recent Transactions Section */}
             <Card>

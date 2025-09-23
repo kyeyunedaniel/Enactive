@@ -20,6 +20,7 @@ use App\Http\Controllers\PesapalController;
 use App\Http\Controllers\WalletTranactionController; 
 use App\Http\Controllers\PesapalTransactionController;
 use App\Http\Controllers\SupportersController; 
+use App\Http\Controllers\QrCodeController; 
 
 
 /*
@@ -64,13 +65,15 @@ Route::get('/explore', function () {
     return Inertia::render('DashboardScreens/Explore'); //Pages/DashboardScreens/Explore.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.explore');
 
-Route::get('/buttons&graphics', function () {
-    return Inertia::render('DashboardScreens/ButtonsAndGraphics',[
-        'auth' => [
-            'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
-        ]
-    ]); //Pages/DashboardScreens/Support.jsx
-})->middleware(['auth', 'verified'])->name('dashboard.buttons&grahics');
+// Route::get('/buttons&graphics', function () {
+//     return Inertia::render('DashboardScreens/ButtonsAndGraphics',[
+//         'auth' => [
+//             'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
+//         ]
+//     ]); //Pages/DashboardScreens/Support.jsx
+// })->middleware(['auth', 'verified'])->name('dashboard.buttons&grahics');
+
+Route::get('/buttons&graphics', [QrCodeController::class,'viewRiderQRCode'])->middleware(['auth', 'verified'])->name('dashboard.buttons&grahics');
 
 
 Route::get('/settings', function () {

@@ -131,7 +131,7 @@ const SupportLinkCard = ({ publicUrlName }) => {
     const copyToClipboard = () => {
         navigator.clipboard.writeText(supportUrl);
         // You can add a toast notification here
-        alert('Support link copied to clipboard!');
+        // alert('Support link copied to clipboard!');
     };
 
     const openPreview = () => {
@@ -200,7 +200,7 @@ export default function Supporters({ auth, stats, transactions, wallet }) {
             </div>
 
             {/* Quick Actions Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <QuickActionButton
                     icon={<ShareIcon className="w-6 h-6" />}
                     label="Share Your Page"
@@ -209,7 +209,7 @@ export default function Supporters({ auth, stats, transactions, wallet }) {
                     onClick={() => {
                         const url = `${window.location.origin}/support/${auth.user.public_url_name}`;
                         navigator.clipboard.writeText(url);
-                        alert('Support link copied to clipboard!');
+                        // alert('Support link copied to clipboard!');
                     }}
                 />
                 <QuickActionButton
@@ -219,7 +219,7 @@ export default function Supporters({ auth, stats, transactions, wallet }) {
                     variant="secondary"
                     onClick={() => window.open(`/support/${auth.user.public_url_name}`, '_blank')}
                 />
-            </div>
+            </div> */}
 
             {/* Support Link Card */}
             <SupportLinkCard publicUrlName={auth.user.public_url_name} />
@@ -260,7 +260,7 @@ export default function Supporters({ auth, stats, transactions, wallet }) {
                             onClick={() => {
                                 const url = `${window.location.origin}/support/${auth.user.public_url_name}`;
                                 navigator.clipboard.writeText(url);
-                                alert('Support link copied to clipboard! Share it with your audience.');
+                                // alert('Support link copied to clipboard! Share it with your audience.');
                             }}
                         >
                             Copy Support Link

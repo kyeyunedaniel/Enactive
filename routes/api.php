@@ -32,3 +32,22 @@ Route::post('/pesapal/initiate', [PesapalController::class, 'initiatePayment']);
 Route::post('/pesapal/check_transaction_status/', [PesapalController::class, 'checkStatus']);
 
 Route::post('/testing/payment', [WalletTranactionController::class,'createTransaction']); 
+
+
+Route::middleware(['auth', 'second'])->group(function () {
+    // Main sync endpoint - sync all pending transactions
+Route::post('/wallet-sync/pending', [WalletSyncController::class, 'syncAllPendingTransactions']);
+
+// Sync transactions for a specific user
+// Route::post('/wallet-sync/user/{userId}', [WalletSyncController::class, 'syncUserTransactions']);
+
+// Sync transactions for a specific wallet
+// Route::post('/wallet-sync/wallet/{walletId}', [WalletSyncController::class, 'syncWalletTransactions']);
+
+// Sync a specific transaction by ID
+// Route::post('/wallet-sync/transaction/{transactionId}', [WalletSyncController::class, 'syncSpecificTransaction']);
+
+// Get sync statistics
+// Route::get('/wallet-sync/stats', [WalletSyncController::class, 'getSyncStats']);
+
+});

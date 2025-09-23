@@ -57,9 +57,11 @@ RUN composer install --optimize-autoloader --no-scripts --no-interaction --no-de
 # Copy application code
 COPY . .
 
-# Prune dev node modules and build assets
-RUN npm prune --omit=dev --ignore-scripts
+# Build assets BEFORE pruning dev dependencies
 RUN npm run build
+
+# Now prune dev node modules (after build is complete)
+RUN npm prune --omit=dev --ignore-scripts
 
 # Create Laravel required directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \

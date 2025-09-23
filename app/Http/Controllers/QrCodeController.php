@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\User; 
 use Auth; 
 use Inertia\Inertia; 
@@ -22,8 +22,8 @@ class QrCodeController extends Controller
        
         $code =$user_public_url_final; 
         // Generate the QR code as SVG
-        // $qrCode = QrCode::size(300)->generate($code);
-        $qrCode=''; 
+        $qrCode = QrCode::size(300)->generate($code);
+        // $qrCode=''; 
 
         return response($qrCode)
             ->header('Content-Type', 'image/svg+xml');

@@ -110,6 +110,10 @@ Route::get('/onboarding', function () {
 
 Route::get('/supporters',[SupportersController::class,'index'])->middleware(['auth', 'verified'])->name('dashboard.support');
 
+Route::prefix('api')->group(function () {
+    Route::get('/supporters/transactions', [SupportersController::class, 'getTransactions']);
+});
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

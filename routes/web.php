@@ -63,7 +63,7 @@ Route::get('/explore', function () {
     return Inertia::render('DashboardScreens/Explore'); //Pages/DashboardScreens/Explore.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.explore');
 
-Route::get('/support', function () {
+Route::get('/buttons&graphics', function () {
     return Inertia::render('DashboardScreens/ButtonsAndGraphics',[
         'auth' => [
             'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email') : null
@@ -99,13 +99,15 @@ Route::get('/onboarding', function () {
 })->middleware(['auth', 'verified'])->name('onboarding.user');
 
 
-Route::get('/buttons&graphics', function () {
+Route::get('/supporters', function () {
     return Inertia::render('DashboardScreens/Supporters',[
         'auth' => [
             'user' => Auth::user() ? Auth::user()->only('id', 'name', 'email', 'public_url_name') : null
         ]
     ]); //Pages/DashboardScreens/Support.jsx
 })->middleware(['auth', 'verified'])->name('dashboard.support');
+
+
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

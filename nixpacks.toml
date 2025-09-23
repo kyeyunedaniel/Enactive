@@ -1,12 +1,12 @@
 [phases.setup]
 cmds = [
     "apt-get update",
-    "apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev",
-    "docker-php-ext-configure gd --with-freetype --with-jpeg", 
+    "apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev",
+    "docker-php-ext-configure gd --with-freetype --with-jpeg",
     "docker-php-ext-install gd"
 ]
 
 [phases.install]
 cmds = [
-    "composer install --optimize-autoloader --no-scripts --no-interaction"
+    "composer install --optimize-autoloader --no-scripts --no-interaction --ignore-platform-req=ext-gd"
 ]

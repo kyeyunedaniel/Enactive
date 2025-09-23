@@ -1,0 +1,7 @@
+
+# Tell Railway to install GD extension
+[phases.setup]
+aptPkgs = ['libpng-dev', 'libjpeg-dev', 'libfreetype6-dev']
+
+[phases.build]
+cmds = ['install-php-extensions gd']

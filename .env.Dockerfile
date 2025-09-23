@@ -1,4 +1,4 @@
-# Use FrankenPHP (same as Railway was using)
+# Base: FrankenPHP with PHP 8.2
 FROM dunglas/frankenphp:php8.2.29-bookworm
 
 # Install system dependencies
@@ -11,13 +11,14 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js (same version Railway was using)
+# Install Node.js (22.x)
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
-# Install PHP extensions (including the ones Railway was installing + GD)
+# Install PHP extensions (Railway’s defaults + GD)
 RUN install-php-extensions \
     ctype \
     curl \
@@ -42,43 +43,32 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy package files first (for better caching)
+# Copy package files first (for build cache)
 COPY package*.json ./
-
-# Install Node dependencies
 RUN npm ci
 
-# Copy composer files
+# Copy composer files and install PHP dependencies
 COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-scripts --no-interaction --no-dev
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # Copy application code
 COPY . .
 
-# Build assets BEFORE pruning dev dependencies
-RUN npm run build
+# Build frontend and prune dev node modules
+RUN npm run build && npm prune --omit=dev --ignore-scripts
 
-# Now prune dev node modules (after build is complete)
-RUN npm prune --omit=dev --ignore-scripts
-
-# Create Laravel required directories and set permissions
+# Prepare Laravel storage & bootstrap directories
 RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Cache Laravel configuration (only in production)
+# Cache Laravel config
 RUN php artisan config:cache \
     && php artisan event:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Create start script
-RUN echo '#!/bin/bash\nphp artisan serve --host=0.0.0.0 --port=$PORT' > /start-container.sh \
-    && chmod +x /start-container.sh
+# Expose default port (Railway sets $PORT env anyway)
+EXPOSE 8000
 
-# Expose port
-EXPOSE $PORT
-
-# Start the application
-CMD ["/start-container.sh"]
+# Start app with FrankenPHP instead of artisan serve
+CMD ["frankenphp", "php-server", "--document-root=/app/public", "--port=$PORT"]

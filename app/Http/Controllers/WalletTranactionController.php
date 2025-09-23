@@ -27,7 +27,7 @@ class WalletTranactionController extends Controller
     try {
 
     $validated = $request->validate([
-        'wallet_id' => 'required|integer|exists:Wallets,id',
+        'wallet_id' => 'required|integer|exists:wallets,id',
         'amount' => 'required|integer',
         'phone_number' => 'required|string',
         'name' => 'required|string',

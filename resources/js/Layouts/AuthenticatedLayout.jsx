@@ -108,9 +108,9 @@ const SidebarContent = ({ user }) => (
                 <span className="ml-3">View page</span>
                 <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-auto text-gray-400" />
             </a>
-            <SidebarNavLink href={route('dashboard.explore')} active={route().current('dashboard.explore')} icon={<Squares2X2Icon className="w-5 h-5" />}>
+            {/* <SidebarNavLink href={route('dashboard.explore')} active={route().current('dashboard.explore')} icon={<Squares2X2Icon className="w-5 h-5" />}>
                 Explore creators
-            </SidebarNavLink>
+            </SidebarNavLink> */}
 
             <SidebarSectionTitle>Monetize</SidebarSectionTitle>
             <SidebarNavLink href={route('dashboard.support')} active={route().current('dashboard.support')} icon={<HeartIcon className="w-5 h-5" />}>

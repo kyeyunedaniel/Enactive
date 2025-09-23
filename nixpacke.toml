@@ -1,9 +1,0 @@
-# Install GD extension and override composer command
-[phases.setup]
-aptPkgs = ['libpng-dev', 'libjpeg-dev', 'libfreetype6-dev']
-
-[phases.extensions]
-cmds = ['install-php-extensions gd']
-
-[phases.install:composer]
-cmds = ['composer install --optimize-autoloader --no-scripts --no-interaction --ignore-platform-req=ext-gd']

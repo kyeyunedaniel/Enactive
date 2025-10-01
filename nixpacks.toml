@@ -1,5 +1,2 @@
-[phases.setup]
-nixPkgs = ['...', 'php82Extensions.gd']
-
-[phases.install]
-cmds = ['install-php-extensions gd']
+[phases.extensions]
+cmds = ['install-php-extensions ctype curl dom fileinfo filter hash mbstring openssl pcre pdo session tokenizer xml pdo_mysql redis gd']

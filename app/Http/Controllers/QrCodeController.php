@@ -26,7 +26,7 @@ class QrCodeController extends Controller
         // $qrCode=''; 
 
         return response($qrCode)
-            ->header('Content-Type', 'image/svg+xml');
+            ->header('Content-Type', 'image/svg+xml'); 
 
         return Inertia::render('DashboardScreens/ButtonsAndGraphics',[
         'auth' => [

@@ -1,12 +1,5 @@
 [phases.setup]
-cmds = [
-    "apt-get update",
-    "apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev",
-    "docker-php-ext-configure gd --with-freetype --with-jpeg",
-    "docker-php-ext-install gd"
-]
+nixPkgs = ['...', 'php82Extensions.gd']
 
 [phases.install]
-cmds = [
-    "composer install --optimize-autoloader --no-scripts --no-interaction --ignore-platform-req=ext-gd"
-]
+cmds = ['install-php-extensions gd']

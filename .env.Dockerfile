@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:php8.2-bookworm
+FROM dunglas/frankenphp:php8.2.29-bookworm
 
 # Set labels
 LABEL maintainer="Railway"
@@ -25,10 +25,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions (ADD GD HERE)
+# Install PHP extensions
 RUN curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o /usr/local/bin/install-php-extensions \
     && chmod +x /usr/local/bin/install-php-extensions \
-    && install-php-extensions gd ctype curl dom fileinfo filter hash mbstring openssl pcre pdo session tokenizer xml pdo_mysql redis
+    && install-php-extensions ctype curl dom fileinfo filter hash mbstring openssl pcre pdo session tokenizer xml pdo_mysql redis
 
 # Set working directory
 WORKDIR /app
@@ -37,8 +37,8 @@ WORKDIR /app
 COPY composer.json composer.lock artisan ./
 COPY . /app
 
-# Install Composer dependencies (remove --no-dev for now to match Railway)
-RUN composer install --optimize-autoloader --no-scripts --no-interaction
+# Install Composer dependencies
+RUN composer install --optimize-autoloader --no-scripts --no-interaction --no-dev
 
 # Install Node dependencies and build assets
 COPY package.json package-lock.json* ./
@@ -54,12 +54,15 @@ RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Use Railway's default port (remove custom Caddyfile setup)
-# Let Railway handle the port configuration
+# Create Caddyfile for FrankenPHP
+RUN echo "{\n  auto_https off\n}\n\n:8000 {\n  root * /app/public\n  php_server\n}" > /Caddyfile
 
-# Create start script
-RUN echo '#!/bin/sh\nfrankenphp php-server --root /app/public' > /start-container.sh \
+# Create start script (mimicking Railway's /start-container.sh)
+RUN echo '#!/bin/sh\nfrankenphp php-server --root /app/public --listen 0.0.0.0:8000' > /start-container.sh \
     && chmod +x /start-container.sh
+
+# Expose port
+EXPOSE 8000
 
 # Start the container
 CMD ["/start-container.sh"]
